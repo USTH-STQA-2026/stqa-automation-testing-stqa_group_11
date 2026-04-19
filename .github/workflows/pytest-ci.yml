@@ -1,0 +1,53 @@
+name: Pytest CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Install Playwright browser
+        run: playwright install --with-deps chromium
+
+      - name: Install xvfb
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb
+
+      - name: Run pytest and generate JUnit report
+        env:
+          BASE_URL: https://stqa.rbc.vn
+          TEST_EMAIL: ba.nguyen@email.com
+          TEST_PASSWORD: password123
+          TEST_DISPLAY_NAME: Nguyễn Học Bá
+          CI: "true"
+          HEADLESS: "false"
+        run: xvfb-run -a pytest --junitxml=report.xml
+
+      - name: Upload test artifacts
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: pytest-artifacts
+          path: |
+            report.xml
+            screenshots/**
+          if-no-files-found: warn
+          retention-days: 14
