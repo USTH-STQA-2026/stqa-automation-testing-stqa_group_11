@@ -104,9 +104,6 @@ def test_login_fail_empty_fields(page, test_config):
     #  Navigate to login page
     page.goto(test_config["base_url"])
 
-    #  Enable Flutter semantics
-    page.evaluate("flutterDriver({ semantics: true })")
-
     #  Click Login button without entering Email/Password
     page.get_by_role("button", name="Đăng nhập").click()
 
