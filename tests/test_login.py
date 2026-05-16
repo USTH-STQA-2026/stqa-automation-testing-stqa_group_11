@@ -88,7 +88,7 @@ def test_login_fail_wrong_password(page, test_config):
     """
     # TODO: Students implement here (Sinh viên viết code ở đây)
 
-    def test_login_wrong_password(page, test_config):
+   
     # Arrange: nhập email đúng nhưng mật khẩu sai
     login(page, test_config, password="sai_mat_khau")
 
