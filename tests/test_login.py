@@ -104,7 +104,6 @@ def test_login_fail_wrong_password(page, test_config):
 
     # Screenshot: chụp màn hình kết quả
     page.screenshot(path=f"{test_config['screenshot_dir']}/login_wrong_password.png")
-   
     pytest.skip("Implemented (Đã hoàn thành)")
 
 
