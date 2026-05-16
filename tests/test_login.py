@@ -123,23 +123,23 @@ def test_login_fail_empty_fields(page, test_config):
            (*Assert: URL vẫn ở trang đăng nhập*)
     """
 
-    # 1. Navigate to login page
+      # Navigate to login page
     page.goto(
         test_config["base_url"],
         wait_until="networkidle",
         timeout=60000
     )
 
-    # 2. Enable Flutter semantics
+    # Enable Flutter semantics
     enable_flutter_semantics(page)
 
-    # 3. Do NOT enter Email/Password
+    # Click login without entering anything
     flutter_click_button(page, "Đăng nhập")
 
     # Wait for UI update
     wait_for_flutter(page)
 
-    # Save screenshot
+    # Screenshot
     page.screenshot(
         path=os.path.join(
             SCREENSHOT_DIR,
@@ -147,6 +147,10 @@ def test_login_fail_empty_fields(page, test_config):
         )
     )
 
-    # 4. Assert: URL still on login page
-    assert "login" in page.url.lower(), \
+    # Assert still on login screen
+    sem_text = " ".join(
+        page.locator("flt-semantics").all_text_contents()
+    )
+
+    assert "Đăng nhập" in sem_text, \
         "System unexpectedly navigated away from login page"
