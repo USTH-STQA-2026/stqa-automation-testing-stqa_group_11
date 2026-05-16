@@ -152,9 +152,6 @@ def test_login_fail_empty_fields(page, test_config):
     # 4. Assert: URL still on login page
     assert "login" in page.url.lower(), \
         "System unexpectedly navigated away from login page"
-
-    
-
    pytest.skip("Implemented — Đã hoàn thành")
 
     
