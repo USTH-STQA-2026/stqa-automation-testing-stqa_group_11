@@ -21,12 +21,13 @@ Sử dụng **Playwright + Python** để kiểm thử hệ thống Mượn sác
 | **Lớp**      | `<!-- VD: SE001.P11 -->`     |
 | **Học kỳ**   | `<!-- VD: HK2 2025-2026 -->` |
 
-| #   | MSSV | Họ và tên | Vai trò     |
-| --- | ---- | --------- | ----------- |
-| 1   |      |           | Nhóm trưởng |
-| 2   |      |           | Thành viên  |
-| 3   |      |           | Thành viên  |
-| 4   |      |           | Thành viên  |
+| #   | MSSV      | Họ và tên         | Vai trò     |
+| --- | ----      | ---------         | ----------- |
+| 1   | 23BA14265 | Lê Thanh Thảo     | Nhóm trưởng |
+| 2   | 23BA14140 | Nguyễn Đình Huy   | Thành viên  |
+| 3   | 23BA14193 | Nguyễn Đức Minh   | Thành viên  |
+| 4   | 2BA14194  | Lê Minh           | Thành viên  |
+| 5   | 23BA1495  | Nguyễn Quang Minh | Thành viên  |
 
 ---
 
