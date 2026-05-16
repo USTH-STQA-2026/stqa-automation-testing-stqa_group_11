@@ -51,6 +51,23 @@ def test_login_success(page, test_config):
 
 def test_login_fail_wrong_password(page, test_config):
     """TC-02: Login fail – wrong password (*Đăng nhập thất bại – sai mật khẩu*)
+    def test_login_wrong_password(page, test_config):
+    # Arrange: nhập email đúng nhưng mật khẩu sai
+    login(page, test_config, password="sai_mat_khau")
+
+    # Act: nhấn nút đăng nhập
+    # (hàm login đã thực hiện hành động này)
+
+    # Smart Wait: chờ hệ thống hiển thị lại màn hình login
+    wait_for_flutter(page, text="Đăng nhập")
+
+    # Assert: vẫn ở màn hình đăng nhập
+    sem_text = " ".join(page.locator("flt-semantics").all_text_contents())
+    assert "Đăng nhập" in sem_text
+
+    # Screenshot: chụp màn hình kết quả
+    page.screenshot(path=f"{test_config['screenshot_dir']}/login_wrong_password.png")
+
 
     🔴 NOT COMPLETED — Students must implement this test case.
     (*CHƯA HOÀN THÀNH — Sinh viên cần viết code cho test case này.*)
