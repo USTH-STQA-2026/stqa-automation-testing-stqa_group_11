@@ -122,15 +122,9 @@ def test_login_fail_empty_fields(page, test_config):
       """ 
    
    # TODO: Students implement here (Sinh viên viết code ở đây)
-def test_login_fail_empty_fields(page, test_config):
-    """TC-03: Login fail – empty fields (*Đăng nhập thất bại – để trống các trường*)
 
-    Description (*Mô tả*):
-        Leave all fields empty, click Login → system stays on login page.
-        (*Không nhập gì, bấm Đăng nhập → hệ thống không chuyển trang.*)
-    """
 
-    # 1. Navigate to login page
+   # 1. Navigate to login page
     page.goto(
         test_config["base_url"],
         wait_until="networkidle",
@@ -162,3 +156,5 @@ def test_login_fail_empty_fields(page, test_config):
     
 
    pytest.skip("Implemented — Đã hoàn thành")
+
+    
