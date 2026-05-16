@@ -113,17 +113,17 @@ def test_login_fail_empty_fields(page, test_config):
     Description (*Mô tả*):
         Leave all fields empty, click Login → system stays on login page.
         (*Không nhập gì, bấm Đăng nhập → hệ thống không chuyển trang.*)
-        Suggested steps (*Gợi ý các bước*): 
-           1. Navigate to login page (*Truy cập trang đăng nhập*) 
-           2. Enable Flutter semantics (*Bật Flutter semantics*) 
-           3. Do NOT enter Email/Password — click "Đăng nhập" immediately (*KHÔNG nhập Email/Mật khẩu — click "Đăng nhập" ngay*) 
-           4. Assert: URL still on login page (*Assert: URL vẫn ở trang đăng nhập*) 
-      """ 
-   
-   # TODO: Students implement here (Sinh viên viết code ở đây)
 
+    Suggested steps (*Gợi ý các bước*):
+        1. Navigate to login page (*Truy cập trang đăng nhập*)
+        2. Enable Flutter semantics (*Bật Flutter semantics*)
+        3. Do NOT enter Email/Password — click "Đăng nhập" immediately
+           (*KHÔNG nhập Email/Mật khẩu — click "Đăng nhập" ngay*)
+        4. Assert: URL still on login page
+           (*Assert: URL vẫn ở trang đăng nhập*)
+    """
 
-   # 1. Navigate to login page
+    # 1. Navigate to login page
     page.goto(
         test_config["base_url"],
         wait_until="networkidle",
@@ -134,7 +134,6 @@ def test_login_fail_empty_fields(page, test_config):
     enable_flutter_semantics(page)
 
     # 3. Do NOT enter Email/Password
-    # Click "Đăng nhập" immediately
     flutter_click_button(page, "Đăng nhập")
 
     # Wait for UI update
@@ -151,6 +150,3 @@ def test_login_fail_empty_fields(page, test_config):
     # 4. Assert: URL still on login page
     assert "login" in page.url.lower(), \
         "System unexpectedly navigated away from login page"
-   pytest.skip("Implemented — Đã hoàn thành")
-
-    
