@@ -27,7 +27,7 @@ Sử dụng **Playwright + Python** để kiểm thử hệ thống Mượn sác
 | 2   | 23BA14140 | Nguyễn Đình Huy   | Thành viên  |
 | 3   | 23BA14193 | Nguyễn Đức Minh   | Thành viên  |
 | 4   | 23BA14194 | Lê Minh           | Thành viên  |
-| 5   | 23BA1495  | Nguyễn Quang Minh | Thành viên  |
+| 5   | 23BA14195 | Nguyễn Quang Minh | Thành viên  |
 
 ---
 
