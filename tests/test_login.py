@@ -101,14 +101,14 @@ def test_login_fail_empty_fields(page, test_config):
         (*Không nhập gì, bấm Đăng nhập → hệ thống không chuyển trang.*)
     """
 
-    # 1. Navigate to login page
+    #  Navigate to login page
     page.goto(test_config["base_url"])
 
-    # 2. Enable Flutter semantics
+    #  Enable Flutter semantics
     page.evaluate("flutterDriver({ semantics: true })")
 
-    # 3. Click Login button without entering Email/Password
+    #  Click Login button without entering Email/Password
     page.get_by_role("button", name="Đăng nhập").click()
 
-    # 4. Assert: still on login page
+    #  Assert: still on login page
     assert "login" in page.url.lower()
