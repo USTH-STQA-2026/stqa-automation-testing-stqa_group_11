@@ -52,9 +52,6 @@ def test_login_success(page, test_config):
 def test_login_fail_wrong_password(page, test_config):
     """TC-02: Login fail – wrong password (*Đăng nhập thất bại – sai mật khẩu*)
 
-    🔴 NOT COMPLETED — Students must implement this test case.
-    (*CHƯA HOÀN THÀNH — Sinh viên cần viết code cho test case này.*)
-
     Description (*Mô tả*):
         Enter correct email but wrong password → system stays on login page
         or shows an error message.
@@ -90,14 +87,49 @@ def test_login_fail_wrong_password(page, test_config):
            (*Assert: URL vẫn ở trang đăng nhập HOẶC có thông báo lỗi*)
     """
     # TODO: Students implement here (Sinh viên viết code ở đây)
-    pytest.skip("Not implemented — student must complete (Chưa hoàn thành)")
+
+   
+   # 1. Navigate to login page
+    page.goto(
+        test_config["base_url"],
+        wait_until="networkidle",
+        timeout=60000
+    )
+
+    # 2. Enable Flutter semantics
+    enable_flutter_semantics(page)
+
+    # 3. Enter correct Email
+    flutter_fill(page, "Email", test_config["email"])
+
+    # 4. Enter wrong Password
+    flutter_fill(page, "Mật khẩu", "wrongpassword")
+
+    # 5. Click "Đăng nhập"
+    flutter_click_button(page, "Đăng nhập")
+
+    # Wait for UI update
+    wait_for_flutter(page)
+
+    # Screenshot
+    page.screenshot(
+        path=os.path.join(
+            SCREENSHOT_DIR,
+            "login_fail_wrong_password.png"
+        )
+    )
+
+    # 6. Assert: still on login screen
+    sem_text = " ".join(
+        page.locator("flt-semantics").all_text_contents()
+    )
+
+    assert "Đăng nhập" in sem_text, \
+        "System unexpectedly logged in with wrong password"
 
 
 def test_login_fail_empty_fields(page, test_config):
     """TC-03: Login fail – empty fields (*Đăng nhập thất bại – để trống các trường*)
-
-    🔴 NOT COMPLETED — Students must implement this test case.
-    (*CHƯA HOÀN THÀNH — Sinh viên cần viết code cho test case này.*)
 
     Description (*Mô tả*):
         Leave all fields empty, click Login → system stays on login page.
@@ -108,7 +140,38 @@ def test_login_fail_empty_fields(page, test_config):
         2. Enable Flutter semantics (*Bật Flutter semantics*)
         3. Do NOT enter Email/Password — click "Đăng nhập" immediately
            (*KHÔNG nhập Email/Mật khẩu — click "Đăng nhập" ngay*)
-        4. Assert: URL still on login page (*Assert: URL vẫn ở trang đăng nhập*)
+        4. Assert: URL still on login page
+           (*Assert: URL vẫn ở trang đăng nhập*)
     """
-    # TODO: Students implement here (Sinh viên viết code ở đây)
-    pytest.skip("Not implemented — student must complete (Chưa hoàn thành)")
+
+      # Navigate to login page
+    page.goto(
+        test_config["base_url"],
+        wait_until="networkidle",
+        timeout=60000
+    )
+
+    # Enable Flutter semantics
+    enable_flutter_semantics(page)
+
+    # Click login without entering anything
+    flutter_click_button(page, "Đăng nhập")
+
+    # Wait for UI update
+    wait_for_flutter(page)
+
+    # Screenshot
+    page.screenshot(
+        path=os.path.join(
+            SCREENSHOT_DIR,
+            "login_fail_empty_fields.png"
+        )
+    )
+
+    # Assert still on login screen
+    sem_text = " ".join(
+        page.locator("flt-semantics").all_text_contents()
+    )
+
+    assert "Đăng nhập" in sem_text, \
+        "System unexpectedly navigated away from login page"
