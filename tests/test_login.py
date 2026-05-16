@@ -89,22 +89,43 @@ def test_login_fail_wrong_password(page, test_config):
     # TODO: Students implement here (Sinh viên viết code ở đây)
 
    
-    # Arrange: nhập email đúng nhưng mật khẩu sai
-    login(page, test_config, password="sai_mat_khau")
+   # 1. Navigate to login page
+    page.goto(
+        test_config["base_url"],
+        wait_until="networkidle",
+        timeout=60000
+    )
 
-    # Act: nhấn nút đăng nhập
-    # (hàm login đã thực hiện hành động này)
+    # 2. Enable Flutter semantics
+    enable_flutter_semantics(page)
 
-    # Smart Wait: chờ hệ thống hiển thị lại màn hình login
-    wait_for_flutter(page, text="Đăng nhập")
+    # 3. Enter correct Email
+    flutter_fill(page, "Email", test_config["email"])
 
-    # Assert: vẫn ở màn hình đăng nhập
-    sem_text = " ".join(page.locator("flt-semantics").all_text_contents())
-    assert "Đăng nhập" in sem_text
+    # 4. Enter wrong Password
+    flutter_fill(page, "Mật khẩu", "wrongpassword")
 
-    # Screenshot: chụp màn hình kết quả
-    page.screenshot(path=f"{test_config['screenshot_dir']}/login_wrong_password.png")
-    pytest.skip("Implemented (Đã hoàn thành)")
+    # 5. Click "Đăng nhập"
+    flutter_click_button(page, "Đăng nhập")
+
+    # Wait for UI update
+    wait_for_flutter(page)
+
+    # Screenshot
+    page.screenshot(
+        path=os.path.join(
+            SCREENSHOT_DIR,
+            "login_fail_wrong_password.png"
+        )
+    )
+
+    # 6. Assert: still on login screen
+    sem_text = " ".join(
+        page.locator("flt-semantics").all_text_contents()
+    )
+
+    assert "Đăng nhập" in sem_text, \
+        "System unexpectedly logged in with wrong password"
 
 
 def test_login_fail_empty_fields(page, test_config):
