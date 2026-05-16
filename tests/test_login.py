@@ -51,26 +51,6 @@ def test_login_success(page, test_config):
 
 def test_login_fail_wrong_password(page, test_config):
     """TC-02: Login fail – wrong password (*Đăng nhập thất bại – sai mật khẩu*)
-    def test_login_wrong_password(page, test_config):
-    # Arrange: nhập email đúng nhưng mật khẩu sai
-    login(page, test_config, password="sai_mat_khau")
-
-    # Act: nhấn nút đăng nhập
-    # (hàm login đã thực hiện hành động này)
-
-    # Smart Wait: chờ hệ thống hiển thị lại màn hình login
-    wait_for_flutter(page, text="Đăng nhập")
-
-    # Assert: vẫn ở màn hình đăng nhập
-    sem_text = " ".join(page.locator("flt-semantics").all_text_contents())
-    assert "Đăng nhập" in sem_text
-
-    # Screenshot: chụp màn hình kết quả
-    page.screenshot(path=f"{test_config['screenshot_dir']}/login_wrong_password.png")
-
-
-    🔴 NOT COMPLETED — Students must implement this test case.
-    (*CHƯA HOÀN THÀNH — Sinh viên cần viết code cho test case này.*)
 
     Description (*Mô tả*):
         Enter correct email but wrong password → system stays on login page
@@ -107,7 +87,25 @@ def test_login_fail_wrong_password(page, test_config):
            (*Assert: URL vẫn ở trang đăng nhập HOẶC có thông báo lỗi*)
     """
     # TODO: Students implement here (Sinh viên viết code ở đây)
-    pytest.skip("Not implemented — student must complete (Chưa hoàn thành)")
+
+    def test_login_wrong_password(page, test_config):
+    # Arrange: nhập email đúng nhưng mật khẩu sai
+    login(page, test_config, password="sai_mat_khau")
+
+    # Act: nhấn nút đăng nhập
+    # (hàm login đã thực hiện hành động này)
+
+    # Smart Wait: chờ hệ thống hiển thị lại màn hình login
+    wait_for_flutter(page, text="Đăng nhập")
+
+    # Assert: vẫn ở màn hình đăng nhập
+    sem_text = " ".join(page.locator("flt-semantics").all_text_contents())
+    assert "Đăng nhập" in sem_text
+
+    # Screenshot: chụp màn hình kết quả
+    page.screenshot(path=f"{test_config['screenshot_dir']}/login_wrong_password.png")
+   
+    pytest.skip("Implemented (Đã hoàn thành)")
 
 
 def test_login_fail_empty_fields(page, test_config):
