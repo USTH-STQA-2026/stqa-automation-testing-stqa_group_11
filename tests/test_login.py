@@ -99,8 +99,8 @@ def test_login_fail_wrong_password(page, test_config):
     # 2. Enable Flutter semantics
     enable_flutter_semantics(page)
 
-    # 3. Enter correct Email
-    flutter_fill(page, "Email", test_config["email"])
+    # 3. Enter correct Email (use dam.tran — different active account)
+    flutter_fill(page, "Email", "dam.tran@email.com")
 
     # 4. Enter wrong Password
     flutter_fill(page, "Mật khẩu", "wrongpassword")
