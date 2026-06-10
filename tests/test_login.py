@@ -3,13 +3,11 @@ Login Tests (*Kiểm thử Đăng nhập*) — Library Book Borrowing System (*H
 
 📖 Textbook concepts in this file:
    - RIPR Model (Ch.2): See [R], [I], [P], [R✓] comments in TC-01
-   - Data-Driven Testing / @parametrize (Ch.3 §3.3.2): See hint in TC-02/TC-03
+   - Data-Driven Testing / @parametrize (Ch.3 §3.3.2): TC-02 + TC-03 + TC-02b gộp bằng @pytest.mark.parametrize
 
-This file contains 1 completed example (TC-01).
-Students must complete TC-02 and TC-03.
+This file contains 1 completed example (TC-01) and 1 data-driven test (TC-02, TC-03, TC-02b).
 
-(*File này chứa 1 ví dụ mẫu (TC-01) đã hoàn chỉnh.
-Sinh viên cần hoàn thành TC-02 và TC-03.*)
+(*File này chứa 1 ví dụ mẫu (TC-01) đã hoàn chỉnh và 1 test data-driven gộp TC-02, TC-03, TC-02b.*)
 """
 import os
 import pytest
@@ -49,129 +47,72 @@ def test_login_success(page, test_config):
         f"(Đăng nhập không thành công: không tìm thấy tên hoặc nút Đăng xuất)"
 
 
-def test_login_fail_wrong_password(page, test_config):
-    """TC-02: Login fail – wrong password (*Đăng nhập thất bại – sai mật khẩu*)
+# ---------------------------------------------------------------------------
+# 💡 Bonus B2 — Data-Driven Testing (Ch.3 §3.3.2)
+# ---------------------------------------------------------------------------
+# TC-02, TC-03, TC-02b có cùng pattern (nhập → click → kiểm tra lỗi).
+# Thay vì viết 3 hàm test riêng biệt (lặp code), ta gộp bằng
+# @pytest.mark.parametrize — mỗi bộ dữ liệu tạo 1 test case riêng
+# trong pytest output.
+#
+# 📖 Textbook (Ch.3 §3.3.2): Data-Driven Testing tách dữ liệu khỏi code test.
+# Tương đương DataPoints trong JUnit.
+#
+# Trước (viết riêng):                         Sau (@parametrize):
+#   3 hàm test, code gần giống nhau → DRY      1 hàm + 3 bộ dữ liệu
+#   Thêm TC mới = viết thêm hàm                Thêm TC mới = thêm 1 dòng tuple
+#   Khó bảo trì khi logic thay đổi             Sửa 1 chỗ = áp dụng tất cả
+# ---------------------------------------------------------------------------
 
-    Description (*Mô tả*):
-        Enter correct email but wrong password → system stays on login page
-        or shows an error message.
-        (*Nhập email đúng nhưng mật khẩu sai → hệ thống không chuyển trang,
-        hoặc hiển thị thông báo lỗi.*)
+@pytest.mark.parametrize(
+    "email, password, tc_id, description",
+    [
+        # TC-02: Sai mật khẩu — email đúng nhưng mật khẩu sai
+        ("dam.tran@email.com", "wrongpassword", "TC-02", "Sai mật khẩu"),
+        # TC-03: Bỏ trống cả hai trường
+        ("", "", "TC-03", "Bỏ trống cả hai trường"),
+        # TC-02b: Email không tồn tại trong hệ thống
+        ("nobody@test.com", "anything", "TC-02b", "Email không tồn tại"),
+    ],
+)
+def test_login_fail(page, test_config, email, password, tc_id, description):
+    """TC-02/03/02b: Login fail — Data-Driven Testing
+    (*Đăng nhập thất bại — Kiểm thử hướng dữ liệu*)
 
-    📖 RIPR — Áp dụng cho test case này:
+    💡 Bonus B2: Gộp nhiều kịch bản đăng nhập thất bại vào 1 hàm test duy nhất
+    bằng @pytest.mark.parametrize. Mỗi bộ dữ liệu (email, password) tạo ra
+    1 test case riêng biệt trong pytest output.
+
+    📖 RIPR — Áp dụng cho tất cả các kịch bản trong bộ dữ liệu:
         [R] page.goto(...) → Chạm tới trang đăng nhập
-        [I] flutter_fill(..., "wrongpassword") → Nhiễm trạng thái lỗi
+        [I] flutter_fill(..., email/password) → Nhiễm trạng thái lỗi
         [P] Hệ thống xử lý login → Lỗi lan truyền ra thông báo
         [R✓] assert ... → Test Oracle kiểm tra thông báo lỗi
 
-    💡 Bonus B2 — Data-Driven Testing:
-        TC-02 và TC-03 có cùng pattern (nhập → click → kiểm tra lỗi).
-        Bạn có thể gộp bằng @pytest.mark.parametrize:
-
-        @pytest.mark.parametrize("email, password, tc_id", [
-            ("valid@email.com", "wrongpass", "TC-02"),
-            ("", "", "TC-03"),
-        ])
-        def test_login_fail(page, test_config, email, password, tc_id):
-            ...
-
-        Xem thêm: docs/textbook-concepts.md §3 (Data-Driven Testing)
-
-    Suggested steps (*Gợi ý các bước*):
-        1. Navigate to login page (*Truy cập trang đăng nhập*)
-        2. Enable Flutter semantics (*Bật Flutter semantics*)
-        3. Enter correct Email (from test_config["email"]) (*Nhập Email đúng*)
-        4. Enter wrong Password (e.g. "wrongpassword") (*Nhập Mật khẩu sai*)
-        5. Click "Đăng nhập" (*Click "Đăng nhập"*)
-        6. Assert: URL still on login page OR error message shown
-           (*Assert: URL vẫn ở trang đăng nhập HOẶC có thông báo lỗi*)
+    Xem thêm: docs/textbook-concepts.md §3 (Data-Driven Testing)
     """
-    # TODO: Students implement here (Sinh viên viết code ở đây)
-
-   
-   # 1. Navigate to login page
-    page.goto(
-        test_config["base_url"],
-        wait_until="networkidle",
-        timeout=60000
-    )
-
-    # 2. Enable Flutter semantics
+    # [R] Reachability: Truy cập trang đăng nhập
+    page.goto(test_config["base_url"], wait_until="networkidle", timeout=60000)
     enable_flutter_semantics(page)
 
-    # 3. Enter correct Email (use dam.tran — different active account)
-    flutter_fill(page, "Email", "dam.tran@email.com")
+    # [I] Infection: Nhập dữ liệu test — mỗi bộ dữ liệu kích hoạt lỗi khác nhau
+    if email:
+        flutter_fill(page, "Email", email)
+    if password:
+        flutter_fill(page, "Mật khẩu", password)
 
-    # 4. Enter wrong Password
-    flutter_fill(page, "Mật khẩu", "wrongpassword")
-
-    # 5. Click "Đăng nhập"
+    # Act: Click "Đăng nhập"
     flutter_click_button(page, "Đăng nhập")
 
-    # Wait for UI update
+    # [P] Propagation: Chờ hệ thống xử lý → lỗi lan truyền ra UI
     wait_for_flutter(page)
 
-    # Screenshot
+    # Screenshot — mỗi TC có file screenshot riêng theo tc_id
     page.screenshot(
-        path=os.path.join(
-            SCREENSHOT_DIR,
-            "login_fail_wrong_password.png"
-        )
+        path=os.path.join(SCREENSHOT_DIR, f"{tc_id.lower()}_login_fail.png")
     )
 
-    # 6. Assert: still on login screen
-    sem_text = " ".join(
-        page.locator("flt-semantics").all_text_contents()
-    )
-
+    # [R✓] Revealability: Kiểm tra kết quả — vẫn ở trang đăng nhập
+    sem_text = " ".join(page.locator("flt-semantics").all_text_contents())
     assert "Đăng nhập" in sem_text, \
-        "System unexpectedly logged in with wrong password"
-
-
-def test_login_fail_empty_fields(page, test_config):
-    """TC-03: Login fail – empty fields (*Đăng nhập thất bại – để trống các trường*)
-
-    Description (*Mô tả*):
-        Leave all fields empty, click Login → system stays on login page.
-        (*Không nhập gì, bấm Đăng nhập → hệ thống không chuyển trang.*)
-
-    Suggested steps (*Gợi ý các bước*):
-        1. Navigate to login page (*Truy cập trang đăng nhập*)
-        2. Enable Flutter semantics (*Bật Flutter semantics*)
-        3. Do NOT enter Email/Password — click "Đăng nhập" immediately
-           (*KHÔNG nhập Email/Mật khẩu — click "Đăng nhập" ngay*)
-        4. Assert: URL still on login page
-           (*Assert: URL vẫn ở trang đăng nhập*)
-    """
-
-      # Navigate to login page
-    page.goto(
-        test_config["base_url"],
-        wait_until="networkidle",
-        timeout=60000
-    )
-
-    # Enable Flutter semantics
-    enable_flutter_semantics(page)
-
-    # Click login without entering anything
-    flutter_click_button(page, "Đăng nhập")
-
-    # Wait for UI update
-    wait_for_flutter(page)
-
-    # Screenshot
-    page.screenshot(
-        path=os.path.join(
-            SCREENSHOT_DIR,
-            "login_fail_empty_fields.png"
-        )
-    )
-
-    # Assert still on login screen
-    sem_text = " ".join(
-        page.locator("flt-semantics").all_text_contents()
-    )
-
-    assert "Đăng nhập" in sem_text, \
-        "System unexpectedly navigated away from login page"
+        f"[{tc_id}] {description}: System unexpectedly navigated away from login page"

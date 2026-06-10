@@ -259,11 +259,57 @@ Mỗi test fixture `page` tạo **browser context mới** → trạng thái trì
 
 ---
 
+## 6.5. Bonus B2 — Data-Driven Testing / Kiểm thử hướng dữ liệu
+
+### Đã triển khai
+
+Bộ test sử dụng `@pytest.mark.parametrize` (textbook Ch.3 §3.3.2) để tách dữ liệu test khỏi code logic, thực hiện ở 2 nhóm:
+
+#### Nhóm 1: Đăng nhập thất bại (`tests/test_login.py`)
+
+TC-02, TC-03, TC-02b gộp thành 1 hàm `test_login_fail` với 3 bộ dữ liệu:
+
+| Bộ dữ liệu | Email | Mật khẩu | tc_id | Mô tả |
+|------------|-------|----------|-------|-------|
+| 1 | `dam.tran@email.com` | `wrongpassword` | TC-02 | Sai mật khẩu |
+| 2 | *(trống)* | *(trống)* | TC-03 | Bỏ trống cả hai trường |
+| 3 | `nobody@test.com` | `anything` | TC-02b | Email không tồn tại |
+
+**Lợi ích Data-Driven** (so với viết riêng 3 hàm):
+- Code logic chỉ viết 1 lần (DRY — Don't Repeat Yourself)
+- Thêm kịch bản mới = thêm 1 dòng tuple, không cần viết hàm mới
+- Sửa logic assert = sửa 1 chỗ, áp dụng cho tất cả bộ dữ liệu
+
+#### Nhóm 2: Thêm thành viên — xác thực email (`tests/test_extended.py`)
+
+TC-20, TC-21, TC-27a, TC-27b, TC-27c gộp thành 1 hàm `test_add_member_email_validation_data_driven` với 5 bộ dữ liệu:
+
+| Bộ dữ liệu | Email | tc_id | Expect | Mô tả |
+|------------|-------|-------|--------|-------|
+| 1 | `testmember2024@email.com` | TC-20 | Success | Email hợp lệ |
+| 2 | `ba.nguyen@email.com` | TC-21 | Reject | Email trùng |
+| 3 | `invalidemail` | TC-27a | Reject | Không có @ |
+| 4 | `user@domain` | TC-27b | Reject | Không có dấu chấm trong domain |
+| 5 | *(trống)* | TC-27c | Reject | Email bỏ trống |
+
+**Đặc điểm**: Thêm flag `expect_success` trong bộ dữ liệu để assertion tự động chọn nhánh kiểm tra (thành công vs từ chối) — minh hoạ sức mạnh của data-driven khi cùng 1 hàm xử lý cả positive và negative cases.
+
+### Ánh xạ Textbook
+
+| Khái niệm textbook | Áp dụng trong repo |
+|---|---|
+| Data-Driven Testing (Ch.3 §3.3.2) | `@pytest.mark.parametrize` gộp nhiều bộ dữ liệu vào 1 hàm |
+| DataPoints trong JUnit (Ch.3 §3.3.3) | Tương đương: danh sách tuple trong `parametrize` |
+| DRY Principle | Code logic login / add-member chỉ viết 1 lần, dữ liệu thay đổi |
+
+---
+
 ## 7. Khai báo sử dụng AI
 
-Bộ test TC-13 đến TC-31 và báo cáo được hỗ trợ bởi **Claude Code (Anthropic)**. Cụ thể:
+Bộ test TC-13 đến TC-31, báo cáo, và Data-Driven Testing (Bonus B2) được hỗ trợ bởi **Claude Code (Anthropic)**. Cụ thể:
 - AI phân tích SRS và đề xuất 19 test case bổ sung bao phủ các requirement chưa được test
 - AI sinh locator pattern và assertion phù hợp với Flutter Web CanvasKit Semantics Tree
 - AI chẩn đoán và sửa lỗi timeout (15000ms → 45000ms), aria-label assertion, form flow
+- AI hỗ trợ triển khai `@pytest.mark.parametrize` cho Bonus B2 — gộp TC-02/03/02b và TC-20/21/27
 - Nhóm đã kiểm tra logic, xem screenshot minh chứng và xác nhận kết quả trước khi nộp
 - Toàn bộ code được hiểu và có thể giải thích bởi thành viên nhóm

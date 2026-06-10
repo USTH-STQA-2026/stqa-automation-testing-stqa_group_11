@@ -1726,3 +1726,119 @@ def test_member_cannot_return_others_book(page, test_config):
         "SRS REQ-05: members can only return books THEY are borrowing. "
         f"Sees BOOK003 (ba.nguyen's borrow): {sees_book003}."
     )
+
+
+# ---------------------------------------------------------------------------
+# 💡 Bonus B2 — Data-Driven Testing: Add Member Email Validation (Ch.3 §3.3.2)
+# ---------------------------------------------------------------------------
+# TC-20, TC-21, TC-27 have the same pattern:
+#   Login as librarian → Members tab → "Thêm thành viên" → fill form → submit → check result
+# Instead of 3 separate functions with near-identical setup, we use
+# @pytest.mark.parametrize to drive 5 email scenarios from 1 function.
+#
+# 📖 Textbook (Ch.3 §3.3.2): Data-Driven Testing separates test data from test logic.
+# Adding a new email test case = adding 1 tuple — no new function needed.
+# ---------------------------------------------------------------------------
+
+def _librarian_add_member_setup(page, base_url):
+    """Common setup: login as librarian, navigate to add-member form."""
+    page.goto(base_url, wait_until="domcontentloaded", timeout=60000)
+    page.locator("flt-glass-pane").wait_for(state="attached", timeout=45000)
+    enable_flutter_semantics(page)
+    flutter_fill(page, "Email", "librarian@library.com")
+    flutter_fill(page, "Mật khẩu", "admin123")
+    flutter_click_button(page, "Đăng nhập")
+    wait_for_flutter(page, text="Đăng xuất")
+    enable_flutter_semantics(page)
+    # Switch to "Thành viên" tab
+    tab = page.locator('flt-semantics[role="tab"][aria-label="Thành viên"]')
+    tab.first.click()
+    page.wait_for_timeout(1000)
+    enable_flutter_semantics(page)
+    # Open add-member form
+    flutter_click_button(page, "Thêm thành viên")
+    page.wait_for_timeout(1000)
+    enable_flutter_semantics(page)
+
+
+@pytest.mark.parametrize(
+    "name, email, phone, tc_id, expect_success, description",
+    [
+        # TC-20: Valid email — should succeed (known BUG: system rejects valid email)
+        ("Test Thành Viên Mới", "testmember2024@email.com", "0901234567",
+         "TC-20", True, "Email hợp lệ — nên thêm thành công"),
+        # TC-21: Duplicate email — should be rejected
+        ("Người Trùng Email", "ba.nguyen@email.com", "0912345678",
+         "TC-21", False, "Email trùng — phải từ chối"),
+        # TC-27a: Invalid email — no '@' sign
+        ("Người Test Email Sai", "invalidemail", "0901111111",
+         "TC-27a", False, "Email không có @ — phải từ chối"),
+        # TC-27b: Invalid email — has '@' but no '.' in domain (SRS REQ-07)
+        ("Người Test Domain", "user@domain", "0922222222",
+         "TC-27b", False, "Email không có dấu chấm trong domain — phải từ chối"),
+        # TC-27c: Invalid email — empty string
+        ("Người Test Trống", "", "0933333333",
+         "TC-27c", False, "Email bỏ trống — phải từ chối"),
+    ],
+)
+def test_add_member_email_validation_data_driven(
+    page, test_config, name, email, phone, tc_id, expect_success, description
+):
+    """💡 Bonus B2 — Data-Driven: Add member email validation
+    (*Kiểm thử hướng dữ liệu — xác thực email khi thêm thành viên*)
+
+    Gộp 5 kịch bản email (hợp lệ, trùng, sai format, thiếu domain, trống)
+    vào 1 hàm test duy nhất bằng @pytest.mark.parametrize.
+    Mỗi bộ dữ liệu tạo 1 test case riêng trong pytest output.
+
+    SRS REQ-07: Email phải hợp lệ (có @ VÀ dấu . trong domain).
+    Không cho phép tạo email đã tồn tại → thông báo lỗi.
+    """
+    # Common setup: login as librarian → open add-member form
+    _librarian_add_member_setup(page, test_config["base_url"])
+
+    # Fill form with test data
+    flutter_fill(page, "Họ và tên", name)
+    flutter_fill(page, "Email", email)
+    flutter_fill(page, "Số điện thoại", phone)
+
+    # Submit
+    flutter_click_button(page, "Thêm thành viên")
+    page.wait_for_timeout(2000)
+    enable_flutter_semantics(page)
+
+    page.screenshot(path=os.path.join(SCREENSHOT_DIR, f"{tc_id.lower()}_add_member_ddt.png"))
+
+    sem_text = " ".join(page.locator("flt-semantics").all_text_contents()).lower()
+
+    if expect_success:
+        # Should be added successfully
+        member_added = (
+            name.lower() in sem_text
+            or email.lower() in sem_text
+            or "thành công" in sem_text
+            or "đã thêm" in sem_text
+        )
+        has_validation_bug = "không hợp lệ" in sem_text
+        assert member_added, (
+            f"[{tc_id}] {description}: Add member FAILED for valid email '{email}'. "
+            f"System shows: '{'Email không hợp lệ.' if has_validation_bug else 'unknown error'}'. "
+            f"Email validation may reject syntactically valid emails — SRS REQ-07."
+        )
+    else:
+        # Should be rejected with an error message
+        rejected = (
+            "đã tồn tại" in sem_text
+            or "trùng" in sem_text
+            or "đã có" in sem_text
+            or "không hợp lệ" in sem_text
+            or "sai định dạng" in sem_text
+            or "lỗi" in sem_text
+            or "không thể" in sem_text
+            or "không được để trống" in sem_text
+            or name.lower() not in sem_text  # member NOT added to list
+        )
+        assert rejected, (
+            f"[{tc_id}] {description}: Invalid email '{email}' was NOT rejected. "
+            f"System should show error — SRS REQ-07."
+        )
