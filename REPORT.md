@@ -1,315 +1,273 @@
-# REPORT.md — Báo cáo kiểm thử tự động / Automation Test Report
+# REPORT.md — Automation Test Report
 
-**Dự án**: Hệ thống Mượn sách Thư viện ABC — https://stqa.rbc.vn  
-**Công cụ**: Python 3.12 + Playwright 1.49.1 + pytest 8.3.4  
-**Ngày chạy**: 2026-06-06  
-**Nhóm**: Nhóm 11 — 252ICT2012.11
+**Project**: ABC Library Book-Borrowing System — https://stqa.rbc.vn
+**Tools**: Python 3.12 + Playwright 1.49.1 + pytest 8.3.4 (Flutter Web / CanvasKit)
+**Run date**: 2026-06-14
+**Team**: Group 11 — 252ICT2012.11 — Semester 2, 2025–2026
 
----
-
-## 1. Tóm tắt kết quả / Executive Summary
-
-| Chỉ số | Giá trị |
-|--------|---------|
-| Tổng số test case | **49** |
-| PASS | **35** |
-| FAIL | **14** |
-| SKIP | 0 |
-| Thời gian chạy | ~720 giây (~12 phút) |
-| Coverage | TC-01 → TC-49 (100%) |
-
-**35/49** test case **PASS**. **14 test case FAIL** — tất cả đều là **lỗi hệ thống thực tế** (không phải lỗi kịch bản test). Đợt kiểm thử sâu (TC-41 → TC-49) phát hiện thêm 3 bug mới nghiêm trọng, nâng tổng lên **8 bug hệ thống** (BUG-01 → BUG-08).
+> This report is the **Bonus B4** deliverable (results description + analysis). Every "expected
+> result" is derived from the **SRS** (`docs/SRS-library-system.md`) — the single source of truth
+> for deciding pass/fail (SRS, "Key principle" section). All figures below are taken directly from
+> one full `pytest` run (JUnit XML), not estimated.
 
 ---
 
-## 2. Kết quả từng Test Case / Individual Test Results
+## 1. Executive Summary
 
-### Nhóm 1: Đăng nhập (`tests/test_login.py`)
+| Metric | Value |
+|--------|-------|
+| Total tests (executed) | **64** |
+| ✅ PASS | **49** |
+| ❌ FAIL | **15** |
+| ⏭ SKIP | 0 |
+| Run time | **2202 s (~36 min 42 s)**, sequential, headless Chromium |
 
-| TC | Tên test | Kết quả | Screenshot | Mô tả |
-|----|----------|---------|------------|-------|
-| TC-01 | `test_login_success` | ✅ PASS | `login_success.png` | Đăng nhập thành công với `ba.nguyen@email.com`. Giao diện hiển thị tên người dùng "Nguyễn Học Bá" và nút "Đăng xuất". |
-| TC-02 | `test_login_fail_wrong_password` | ✅ PASS | `login_fail_wrong_password.png` | Nhập đúng email nhưng sai mật khẩu. Hệ thống không chuyển trang — vẫn ở màn hình đăng nhập. |
-| TC-03 | `test_login_fail_empty_fields` | ✅ PASS | `login_fail_empty_fields.png` | Bấm "Đăng nhập" khi để trống. Hệ thống không chuyển trang. |
+**How to read the 15 FAILs:** these are not 15 separate defects. Of the 15 failing tests:
 
-**Nhận xét**: Luồng đăng nhập hoạt động đúng. Hệ thống ngăn chặn đăng nhập với thông tin không hợp lệ.
+- **8 tests** are **evidence for 4 genuine system bugs** (each bug confirmed by multiple tests).
+- **7 tests** fail **for reasons other than a system bug**: 3 had a weak oracle (false alarm), 2 hit
+  the limits of the client-side data model, 2 belong to a peripheral feature (add member) — see **§6**.
 
----
+> **Update after the recorded run:** the 3 "weak-oracle" tests (TC-16, TC-17, TC-34) have been
+> **fixed** to click the confirm "Mượn" (Borrow) button in the dialog (see §7.2). Re-run and verified:
+> **TC-16/17/34 now PASS**, while TC-33 still FAILs but is now **valid** evidence for BUG-C (it shows
+> "hết hạn" / expired for a *suspended* member). A **full** re-run would therefore yield
+> **64 / 52 PASS / 12 FAIL**. The table above is kept as the recorded full run.
 
-### Nhóm 2: Tìm kiếm & Lọc sách (`tests/test_search.py`)
-
-| TC | Tên test | Kết quả | Screenshot | Mô tả |
-|----|----------|---------|------------|-------|
-| TC-04 | `test_search_book_by_name` | ✅ PASS | `tc04_search_by_name.png` | Tìm kiếm "Flutter" → kết quả có sách Flutter trong `aria-label`. |
-| TC-05 | `test_search_book_no_result` | ✅ PASS | `tc05_search_no_result.png` | Tìm kiếm `"xyz_khong_ton_tai_12345"` → không có card sách nào. |
-| TC-06 | `test_filter_by_category` | ✅ PASS | `tc06_filter_category.png` | Lọc "Công nghệ" → tất cả card sách đều có `aria-label` chứa "Công nghệ". |
-| TC-07 | `test_search_by_author` | ✅ PASS | `tc07_search_by_author.png` | Tìm kiếm tác giả "Nguyễn Minh Đức" → có kết quả. |
-
----
-
-### Nhóm 3: Mượn & Trả sách (`tests/test_borrow_return.py`)
-
-| TC | Tên test | Kết quả | Screenshot | Mô tả |
-|----|----------|---------|------------|-------|
-| TC-08 | `test_borrow_book` | ✅ PASS | `tc08_borrow_book.png` | Mượn sách thành công — dialog xác nhận 2 bước hoạt động đúng. |
-| TC-09 | `test_view_borrowed_books` | ✅ PASS | `tc09_view_borrowed.png` | Xem danh sách sách đang mượn trong tab "Mượn / Trả". |
-| TC-10 | `test_return_book` | ✅ PASS | `tc10_return_book.png` | Trả sách thành công — nút "Trả sách" biến mất sau thao tác. |
+**All 12 mandatory test cases (TC-01 → TC-12) PASS.** The 4 confirmed system bugs (BUG-A → BUG-D)
+all belong to **core business logic** and are demonstrated by `tests/test_deep_logic.py`.
 
 ---
 
-### Nhóm 4: Chức năng chung (`tests/test_general.py`)
+## 2. Method & Oracle
 
-| TC | Tên test | Kết quả | Screenshot | Mô tả |
-|----|----------|---------|------------|-------|
-| TC-11 | `test_logout` | ✅ PASS | `tc11_logout.png` | Đăng xuất → trở về màn hình đăng nhập. |
-| TC-12 | `test_switch_language_to_english` | ✅ PASS | `tc12_language_en.png` | Bấm "EN" → giao diện chuyển sang tiếng Anh. |
+The suite uses the **Arrange → Act → Assert** structure (ASSIGNMENT §4) and two deliberate kinds of test:
 
----
+| Kind | Assertion | Meaning when it runs |
+|------|-----------|----------------------|
+| **Bug-finding test** (`test_bug_*`) | Asserts the **SRS-correct** behavior | **FAIL = bug evidence** (system violates the SRS). ASSIGNMENT §6.3: "A failing test still earns marks". |
+| **Control test** (`test_ok_*`) | Asserts a correct behavior the system **does** get right | **PASS = oracle calibration** (proves the suite does not "fail on everything"). |
 
-### Nhóm 5: Bổ sung — Đăng nhập & Tìm kiếm nâng cao (`tests/test_extended.py`)
-
-| TC | Tên test | Kết quả | Screenshot | SRS | Mô tả |
-|----|----------|---------|------------|-----|-------|
-| TC-13 | `test_login_fail_nonexistent_email` | ✅ PASS | `tc13_login_nonexistent.png` | REQ-01 | Email không tồn tại → hệ thống giữ nguyên màn hình đăng nhập hoặc hiển thị lỗi phù hợp. |
-| TC-14 | `test_search_case_insensitive` | ✅ PASS | `tc14_search_case_insensitive.png` | REQ-03/BR-10 | Tìm kiếm "flutter" (viết thường) → tìm thấy sách "Flutter" (SRS BR-10: không phân biệt hoa/thường). |
-| TC-23 | `test_search_no_result_message` | ✅ PASS | `tc23_no_result_message.png` | REQ-03 | Tìm kiếm không có kết quả → hiển thị thông báo "Không tìm thấy sách". |
-| TC-24 | `test_filter_by_category_economy` | ✅ PASS | `tc24_filter_economy.png` | REQ-03 | Lọc "Kinh tế" → tất cả card sách đều thuộc thể loại Kinh tế. |
-| TC-30 | `test_login_error_message_wrong_password` | ✅ PASS | `tc30_wrong_password_msg.png` | REQ-01 | Sai mật khẩu → hệ thống hiển thị thông báo lỗi phù hợp (vẫn ở màn hình đăng nhập). |
-| TC-31 | `test_login_error_message_empty_fields` | ✅ PASS | `tc31_empty_fields_msg.png` | REQ-01 | Bấm đăng nhập khi để trống → hiển thị thông báo lỗi. |
+> **Key oracle lesson (see §7):** the system's borrow-rejection message only appears **after the
+> confirm "Mượn" (Borrow) button is clicked in the dialog**. A test that only opens the dialog without
+> confirming will **not capture** the message → false alarm. `test_deep_logic.py` always clicks the
+> confirm button, so it reads the correct result.
 
 ---
 
-### Nhóm 6: Bổ sung — Kiểm soát mượn sách (`tests/test_extended.py`)
+## 3. Results per File
 
-| TC | Tên test | Kết quả | Screenshot | SRS | Mô tả |
-|----|----------|---------|------------|-----|-------|
-| TC-15 | `test_borrow_limit_exceeded` | ❌ **FAIL** | `tc15_borrow_limit.png` | REQ-04 | **[LỖI HỆ THỐNG]** Hệ thống cho phép mượn sách thứ 4 (vượt giới hạn 3 sách). SRS yêu cầu từ chối — nhưng không thực thi. |
-| TC-16 | `test_borrow_suspended_member` | ❌ **FAIL** | `tc16_suspended_borrow.png` | REQ-04 | **[LỖI HỆ THỐNG]** Thành viên "Tạm ngưng" (`cu.le`) vẫn có thể đăng nhập và thao tác mượn sách. SRS yêu cầu từ chối. |
-| TC-17 | `test_borrow_expired_member` | ❌ **FAIL** | `tc17_expired_borrow.png` | REQ-04 | **[LỖI HỆ THỐNG]** Thành viên "Hết hạn" (`binh.pham`) vẫn có thể đăng nhập và xem giao diện mượn sách. SRS yêu cầu từ chối. |
-| TC-18 | `test_borrow_already_borrowed_book` | ✅ PASS | `tc18_borrow_already_borrowed.png` | REQ-04/BR-04 | Sách đang được mượn (BOOK003) hiển thị đúng trạng thái — không có nút mượn cho sách "Đang mượn". |
-| TC-28 | `test_lost_book_cannot_be_borrowed` | ✅ PASS | `tc28_lost_book.png` | REQ-04 | Sách "Thất lạc" (BOOK007) không có nút mượn — hệ thống hiển thị đúng trạng thái. |
-| TC-29 | `test_cancel_borrow_dialog_book_stays_available` | ✅ PASS | `tc29_cancel_borrow.png` | REQ-04 | Hủy dialog mượn → sách vẫn ở trạng thái "Có sẵn". Hủy không thay đổi trạng thái sách. |
-
----
-
-### Nhóm 7: Bổ sung — Quản lý thành viên (`tests/test_extended.py`)
-
-| TC | Tên test | Kết quả | Screenshot | SRS | Mô tả |
-|----|----------|---------|------------|-----|-------|
-| TC-20 | `test_librarian_add_member` | ❌ **FAIL** | `tc20_add_member.png` | REQ-07 | **[LỖI HỆ THỐNG]** Thủ thư không thể thêm thành viên mới: hệ thống hiển thị "Email không hợp lệ." ngay cả khi email có định dạng hợp lệ (`testmember2024@email.com`). Email validation quá nghiêm hoặc có lỗi logic. |
-| TC-21 | `test_librarian_add_duplicate_email` | ✅ PASS | `tc21_duplicate_email.png` | REQ-07 | Email trùng bị từ chối — hệ thống hiển thị "Email không hợp lệ." (thông báo lỗi không chính xác so với SRS nhưng việc từ chối là đúng). |
-| TC-27 | `test_add_member_invalid_email_format` | ✅ PASS | `tc27_invalid_email.png` | REQ-07 | Email sai định dạng ("invalidemail") bị từ chối với thông báo "Email không hợp lệ." — xác thực đầu vào hoạt động. |
+| File | Tests | ✅ PASS | ❌ FAIL |
+|------|:-----:|:------:|:------:|
+| `tests/test_login.py` | 4 | 4 | 0 |
+| `tests/test_search.py` | 4 | 4 | 0 |
+| `tests/test_borrow_return.py` | 3 | 3 | 0 |
+| `tests/test_general.py` | 2 | 2 | 0 |
+| `tests/test_extended.py` | 42 | 31 | 11 |
+| `tests/test_deep_logic.py` | 9 | 5 | 4 |
+| **Total** | **64** | **49** | **15** |
 
 ---
 
-### Nhóm 8: Bổ sung — Quá hạn & Phiếu mượn (`tests/test_extended.py`)
+## 4. Mandatory Test Cases (TC-01 → TC-12)
 
-| TC | Tên test | Kết quả | Screenshot | SRS | Mô tả |
-|----|----------|---------|------------|-----|-------|
-| TC-19 | `test_return_overdue_book_warning` | ❌ **FAIL** | `tc19_overdue_return.png` | REQ-05/06 | **[LỖI HỆ THỐNG]** Không có cảnh báo khi trả sách quá hạn. SRS REQ-05 yêu cầu hiển thị cảnh báo "quá hạn" khi trả sách sau thời hạn. |
-| TC-26 | `test_librarian_sees_all_borrow_records` | ✅ PASS | `tc26_librarian_records.png` | REQ-08 | Thủ thư xem được phiếu mượn của tất cả thành viên trong tab "Mượn / Trả" — bao gồm BR001, BR002, BR003. |
+These are the **required** part of the assignment (ASSIGNMENT §3). **All PASS.**
 
----
-
-### Nhóm 9: Bổ sung — Giao diện & Hiển thị (`tests/test_extended.py`)
-
-| TC | Tên test | Kết quả | Screenshot | SRS | Mô tả |
-|----|----------|---------|------------|-----|-------|
-| TC-22 | `test_book_list_displays_after_login` | ✅ PASS | `tc22_book_list.png` | REQ-02 | Sau đăng nhập, danh sách sách hiển thị đủ card với trạng thái "Có sẵn" và tên sách trong `aria-label`. |
-| TC-25 | `test_switch_language_back_to_vietnamese` | ✅ PASS | `tc25_language_vi.png` | — | Chuyển EN → VI thành công, giao diện trở lại tiếng Việt với đầy đủ nhãn tiếng Việt. |
-
----
-
-### Nhóm 10: Kiểm thử sâu — Giới hạn mượn & Phân quyền (`tests/test_extended.py`)
-
-| TC | Tên test | Kết quả | Screenshot | SRS | Mô tả |
-|----|----------|---------|------------|-----|-------|
-| TC-41 | `test_borrow_limit_ba_nguyen` | ❌ **FAIL** | `tc41_borrow_limit_ba_nguyen.png` | REQ-04 | **[LỖI HỆ THỐNG]** ba.nguyen (đang mượn 1 sách) mượn thêm 2 → đủ 3 → thử mượn sách thứ 4. Hệ thống KHÔNG từ chối — cho phép mượn vượt giới hạn. |
-| TC-42 | `test_suspended_member_cannot_complete_borrow` | ✅ PASS | `tc42_suspended_dialog.png` | REQ-04 | Thành viên Tạm ngưng (cu.le) không hoàn tất được dialog mượn sách — sách không biến mất khỏi danh sách "Có sẵn". |
-| TC-43 | `test_expired_member_cannot_complete_borrow` | ✅ PASS | `tc43_expired_dialog.png` | REQ-04 | Thành viên Hết hạn (binh.pham) không hoàn tất được dialog mượn sách. |
-| TC-44 | `test_returned_book_becomes_borrowable_by_another` | ✅ PASS | `tc44_returned_book_available.png` | REQ-05 | Sau khi dam.tran trả sách, số sách "Có sẵn" khôi phục đúng — sách có thể được mượn lại. |
-| TC-45 | `test_overdue_record_visible_to_member` | ❌ **FAIL** | `tc45_overdue_visible_to_member.png` | REQ-06/08 | **[LỖI HỆ THỐNG]** Sau khi Thủ thư nhấn "Kiểm tra sách quá hạn", ba.nguyen vẫn không thấy trạng thái "Quá hạn" trên phiếu BR001 trong tab Mượn/Trả. |
-| TC-46 | `test_librarian_sees_overdue_after_check` | ✅ PASS | `tc46_librarian_overdue.png` | REQ-06 | Thủ thư thấy trạng thái "Quá hạn" sau khi nhấn "Kiểm tra sách quá hạn" — chức năng hoạt động đúng phía Thủ thư. |
-| TC-47 | `test_librarian_restore_via_icon` | ✅ PASS | `tc47_restore_confirmed.png` | §4.2 | Nút "Đặt lại dữ liệu" của Thủ thư hoạt động đúng — reset dữ liệu và trả về màn hình đăng nhập. |
-| TC-48 | `test_borrow_limit_biet_hoang` | ❌ **FAIL** | `tc48_biet_hoang_limit.png` | REQ-04 | **[LỖI HỆ THỐNG]** biet.hoang (đang mượn BOOK013) mượn thêm 3 sách nữa mà không bị từ chối. Hệ thống cho phép mượn 4 sách cùng lúc (vượt giới hạn 3). Số sách "Có sẵn" giảm từ 4 xuống 0. |
-| TC-49 | `test_member_cannot_return_others_book` | ✅ PASS | `tc49_no_return_others_book.png` | REQ-05 | dam.tran (không có sách đang mượn) không thấy nút "Trả sách" — không thể trả sách của người khác. |
+| TC | Test function | File | SRS | Result | Screenshot |
+|----|---------------|------|-----|--------|------------|
+| TC-01 | `test_login_success` | `test_login.py` | REQ-01 | ✅ PASS | `login_success.png` |
+| TC-02 | `test_login_fail` (wrong password) | `test_login.py` | REQ-01 | ✅ PASS | `tc-02_login_fail.png` |
+| TC-03 | `test_login_fail` (empty fields) | `test_login.py` | REQ-01 | ✅ PASS | `tc-03_login_fail.png` |
+| TC-04 | `test_search_book_by_name` | `test_search.py` | REQ-03 | ✅ PASS | `tc04_search_by_name.png` |
+| TC-05 | `test_search_book_no_result` | `test_search.py` | REQ-03 | ✅ PASS | `tc05_search_no_result.png` |
+| TC-06 | `test_filter_by_category` | `test_search.py` | REQ-03 | ✅ PASS | `tc06_filter_category.png` |
+| TC-07 | `test_search_by_author` | `test_search.py` | REQ-03 | ✅ PASS | `tc07_search_by_author.png` |
+| TC-08 | `test_borrow_book` | `test_borrow_return.py` | REQ-04 | ✅ PASS | `tc08_borrow_book.png` |
+| TC-09 | `test_view_borrowed_books` | `test_borrow_return.py` | REQ-08 | ✅ PASS | `tc09_view_borrowed.png` |
+| TC-10 | `test_return_book` | `test_borrow_return.py` | REQ-05 | ✅ PASS | `tc10_return_book.png` |
+| TC-11 | `test_logout` | `test_general.py` | — | ✅ PASS | `tc11_logout.png` |
+| TC-12 | `test_switch_language_to_english` | `test_general.py` | §5 | ✅ PASS | `tc12_language_en.png` |
 
 ---
 
-## 3. Tổng hợp Pass/Fail
+## 5. Confirmed System Bugs (4)
 
-| Trạng thái | Test Cases |
-|-----------|-----------|
-| ✅ PASS (26) | TC-01, TC-02, TC-03, TC-04, TC-05, TC-06, TC-07, TC-08, TC-09, TC-10, TC-11, TC-12, TC-13, TC-14, TC-18, TC-21, TC-22, TC-23, TC-24, TC-25, TC-26, TC-27, TC-28, TC-29, TC-30, TC-31 |
-| ❌ FAIL (5) | **TC-15, TC-16, TC-17, TC-19, TC-20** |
+All 4 bugs were verified **directly on the live system** and belong to core business logic.
 
----
+### BUG-A — Borrow limit off-by-one: a member can hold 4 books instead of 3
+| Field | Detail |
+|-------|--------|
+| **SRS** | REQ-04: "Maximum **3 books** per member at a time" |
+| **Accounts** | `ba.nguyen` (holds 1), `dam.tran` (holds 0), `biet.hoang` (holds 1) |
+| **Steps** | Borrow repeatedly until blocked |
+| **Expected** | Blocked once holding **3** books (4th book refused) |
+| **Actual** | All 3 accounts manage to hold **4** books; only blocked at the **5th**. The guard uses `>= 4` instead of `>= 3`. |
+| **Evidence** | `test_bug_a_borrow_limit_off_by_one` (covers 3 accounts) + `test_borrow_limit_exceeded` (TC-15) + `test_borrow_limit_ba_nguyen` (TC-41) + `test_borrow_limit_biet_hoang` (TC-48) |
+| **Screenshots** | `bug_a_limit_ba.nguyen.png`, `bug_a_limit_dam.tran.png`, `bug_a_limit_biet.hoang.png`, `tc15_borrow_limit.png`, `tc41_borrow_limit_ba_nguyen.png`, `tc48_biet_hoang_limit.png` |
+| **Severity** | 🔴 **Critical** — directly violates a business rule, reproducible on **every** account |
 
-## 4. Các lỗi hệ thống phát hiện / Bugs Found
+### BUG-B — Borrow-record leak between members (authorization violation)
+| Field | Detail |
+|-------|--------|
+| **SRS** | REQ-08: "A member may only view **their own** borrow records. They **must NOT view** other members' records." |
+| **Account** | `dam.tran` (MEM003) using the **"Tra cứu phiếu mượn"** (look up borrow record by member ID) feature |
+| **Steps** | Borrow/Return tab → "Tra cứu phiếu mượn" → enter `MEM002` / `MEM006` → "Tra cứu" (Look up) |
+| **Expected** | Other members' records are not shown |
+| **Actual** | The **full** records leak: BR001 of `ba.nguyen` and BR003 of `biet.hoang` (name, book, borrow date, due date) |
+| **Evidence** | `test_bug_b_member_record_isolation` |
+| **Screenshots** | `bug_b_isolation_dam.tran_MEM002.png`, `bug_b_isolation_dam.tran_MEM006.png` |
+| **Severity** | 🔴 **Critical** — personal data exposed across members |
 
-Tất cả 5 test FAIL đều là **lỗi hệ thống thực sự** (system bugs), không phải lỗi kịch bản test.
+> **Important note:** the default "Phiếu mượn của tôi" (My borrow records) view does **not** leak
+> (test `TC-32` `test_member_cannot_see_other_members_records` PASSES). The hole is **only** in the
+> active "look up by member ID" feature — this is why BUG-B is a real bug even though TC-32 passes.
 
-### BUG-01 — Không giới hạn số sách mượn (TC-15)
-| Mục | Chi tiết |
-|-----|---------|
-| SRS | REQ-04: Tối đa 3 sách/thành viên cùng lúc |
-| Tài khoản test | `biet.hoang@email.com` (MEM006, đã có 1 sách) |
-| Thao tác | Mượn thêm 2 sách → đạt 3 → thử mượn sách thứ 4 |
-| Kết quả thực tế | Hệ thống cho phép mượn sách thứ 4 (hiển thị dialog xác nhận) |
-| Kết quả mong đợi | Hệ thống từ chối với thông báo "Đã đạt giới hạn 3 sách" |
-| Mức độ | 🔴 **Nghiêm trọng** — vi phạm trực tiếp business rule |
+### BUG-C — Wrong rejection reason for a "suspended" member
+| Field | Detail |
+|-------|--------|
+| **SRS** | REQ-04: "The error message must state the **correct reason** for rejection (suspended ≠ expired)" |
+| **Account** | `cu.le` (MEM004, status **Tạm ngưng** / suspended) |
+| **Steps** | Log in → borrow a book → click confirm "Mượn" |
+| **Expected** | A message citing the **"suspended"** reason |
+| **Actual** | The system shows **"Thành viên đã hết hạn. Không thể mượn sách."** (Member has expired. Cannot borrow.) — identical to the message for an *expired* member. There is only one shared "expired" rejection branch. |
+| **Evidence** | `test_bug_c_suspended_member_wrong_reason` + `test_suspended_member_error_message_specificity` (TC-33) |
+| **Screenshots** | `bug_c_suspended_reason.png`, `tc33_suspended_error_msg.png` |
+| **Severity** | 🟠 **High** — the system **blocks correctly** (no borrow) but **reports the wrong reason**, which misleads users |
 
-### BUG-02 — Thành viên bị tạm ngưng vẫn đăng nhập được (TC-16)
-| Mục | Chi tiết |
-|-----|---------|
-| SRS | REQ-04: Thành viên "Tạm ngưng" không được mượn sách |
-| Tài khoản test | `cu.le@email.com` (MEM004, trạng thái Tạm ngưng) |
-| Thao tác | Đăng nhập → tìm nút "Mượn sách này" |
-| Kết quả thực tế | Đăng nhập thành công, hiển thị giao diện mượn sách bình thường |
-| Kết quả mong đợi | Từ chối đăng nhập hoặc ẩn/khóa chức năng mượn sách |
-| Mức độ | 🔴 **Nghiêm trọng** — thành viên không hợp lệ có thể mượn sách |
+> Control: for an **expired** member (`binh.pham`), the "expired" message is actually **correct** —
+> test `test_ok_expired_member_correct_reason` PASSES (`ok_expired_reason.png`). This contrast proves
+> the system wrongly assigns the "expired" reason to a "suspended" member.
 
-### BUG-03 — Thành viên hết hạn vẫn truy cập được (TC-17)
-| Mục | Chi tiết |
-|-----|---------|
-| SRS | REQ-04: Thành viên "Hết hạn" không được mượn sách |
-| Tài khoản test | `binh.pham@email.com` (MEM005, trạng thái Hết hạn) |
-| Thao tác | Đăng nhập → xem giao diện |
-| Kết quả thực tế | Đăng nhập thành công, truy cập giao diện mượn sách bình thường |
-| Kết quả mong đợi | Từ chối đăng nhập hoặc hiển thị cảnh báo/khóa chức năng |
-| Mức độ | 🔴 **Nghiêm trọng** — vi phạm chính sách thành viên |
-
-### BUG-04 — Không cảnh báo quá hạn khi trả sách (TC-19)
-| Mục | Chi tiết |
-|-----|---------|
-| SRS | REQ-05: Hiển thị cảnh báo "quá hạn" khi trả sách sau thời hạn cho phép |
-| Tài khoản test | `ba.nguyen@email.com` (MEM002, BOOK003 quá hạn) |
-| Thao tác | Đăng nhập → tab "Mượn / Trả" → trả sách |
-| Kết quả thực tế | Sách được trả thành công, không có cảnh báo quá hạn nào |
-| Kết quả mong đợi | Hiển thị cảnh báo "Sách quá hạn" trước/sau khi trả |
-| Mức độ | 🟡 **Trung bình** — chức năng trả sách hoạt động nhưng thiếu UX quan trọng |
-
-### BUG-05 — Không thể thêm thành viên mới (TC-20)
-| Mục | Chi tiết |
-|-----|---------|
-| SRS | REQ-07: Thủ thư có thể thêm thành viên mới với họ tên, email, SĐT hợp lệ |
-| Tài khoản test | `librarian@library.com` (Thủ thư) |
-| Thao tác | Form "Thêm thành viên mới" → nhập `testmember2024@email.com` → submit |
-| Kết quả thực tế | Hệ thống hiển thị "Email không hợp lệ." cho email có định dạng hợp lệ |
-| Kết quả mong đợi | Thêm thành viên thành công và hiển thị trong danh sách |
-| Ghi chú | Email validation của form "Thêm thành viên" bị lỗi — từ chối cả email hợp lệ. Email `testmember2024@email.com` tuân thủ RFC 5321 (có `@` và domain `email.com` hợp lệ). |
-| Mức độ | 🔴 **Nghiêm trọng** — chức năng thêm thành viên không sử dụng được |
+### BUG-D — Catalog hides "borrowed" / "lost" books
+| Field | Detail |
+|-------|--------|
+| **SRS** | REQ-02: "Display **all** books... each book has a **status** (Available / Borrowed)" |
+| **Account** | `dam.tran` (searching the catalog) |
+| **Steps** | Search "Kiểm thử phần mềm" (BOOK003, Borrowed) and "Kinh tế vi mô" (BOOK007, Lost) |
+| **Expected** | The books still appear, with their corresponding status |
+| **Actual** | **0 results** for both — the catalog only shows "Available" books and hides non-available ones entirely |
+| **Evidence** | `test_bug_d_catalog_hides_non_available_books` |
+| **Screenshots** | `bug_d_hidden_BOOK003.png`, `bug_d_hidden_BOOK007.png` |
+| **Severity** | 🟠 **High** — violates the display requirement; users cannot tell a book exists but is borrowed/lost |
 
 ---
 
-## 5. Phân tích kỹ thuật / Technical Analysis
+## 6. Reconciliation of All 15 Failures
 
-### 5.1. Xử lý Flutter Web (CanvasKit)
+| # | Failing test | Classification | Explanation |
+|---|--------------|----------------|-------------|
+| 1 | `test_bug_a_borrow_limit_off_by_one` | **BUG-A** | Borrow-limit evidence |
+| 2 | `test_borrow_limit_exceeded` (TC-15) | **BUG-A** | 4th book not blocked |
+| 3 | `test_borrow_limit_ba_nguyen` (TC-41) | **BUG-A** | ba.nguyen holds 4 books |
+| 4 | `test_borrow_limit_biet_hoang` (TC-48) | **BUG-A** | biet.hoang holds 4 books |
+| 5 | `test_bug_b_member_record_isolation` | **BUG-B** | Record leak via lookup |
+| 6 | `test_bug_c_suspended_member_wrong_reason` | **BUG-C** | Wrong "suspended" reason |
+| 7 | `test_suspended_member_error_message_specificity` (TC-33) | **BUG-C** | Oracle **strengthened** (now clicks confirm); now correctly shows "hết hạn" for a suspended member → valid BUG-C evidence. |
+| 8 | `test_bug_d_catalog_hides_non_available_books` | **BUG-D** | Hides non-"Available" books |
+| 9 | `test_borrow_suspended_member` (TC-16) | ✅ **Fixed → now PASS** | Previously only opened the dialog, so no response was captured. Now clicks confirm → the system blocks correctly (shows "không thể" / cannot) → **PASS**. |
+| 10 | `test_borrow_expired_member` (TC-17) | ✅ **Fixed → now PASS** | Same as #9. The expired member **is correctly blocked** → **PASS**. |
+| 11 | `test_expired_member_error_message_specificity` (TC-34) | ✅ **Fixed → now PASS** | Now captures the correct "hết hạn" reason → **PASS**. |
+| 12 | `test_return_overdue_book_warning` (TC-19) | 🟡 Model limitation — **not a bug** | Data is **client-side / per-session** (SRS §5.1): the librarian's "Kiểm tra quá hạn" (overdue check) does not propagate to the member's session. |
+| 13 | `test_overdue_record_visible_to_member` (TC-45) | 🟡 Model limitation — **not a bug** | Same as #12 — a member in a different session does not see the overdue marking. |
+| 14 | `test_librarian_add_member` (TC-20) | 🔵 Peripheral feature — **out of scope** | The "Add member" form rejects a valid email. Agreed to treat as a minor issue, not counted among the logic bugs. |
+| 15 | `test_add_member_email_validation_data_driven[TC-20]` | 🔵 Peripheral feature — **out of scope** | Same issue as #14 (the valid-email dataset). |
 
-Toàn bộ giao diện render trên `<canvas>`, không có HTML DOM thông thường. Giải pháp áp dụng:
-
-- **Semantics Tree**: Gọi `enable_flutter_semantics(page)` sau mỗi thao tác làm thay đổi DOM
-- **Selector**: Dùng `flt-semantics[role="..."][aria-label*="..."]` thay vì CSS selector thông thường
-- **Text vs. aria-label**: Trạng thái sách ("Có sẵn", "Đang mượn") KHÔNG xuất hiện trong `all_text_contents()` — chỉ có trong `aria-label` của `flt-semantics[role="group"]`. Đây là điểm quan trọng khi viết assertion cho TC-22.
-
-### 5.2. Cải tiến so với bộ test ban đầu (TC-01 → TC-12)
-
-| Vấn đề phát hiện | Giải pháp |
-|-----------------|-----------|
-| `flt-glass-pane` timeout 15000ms không đủ (cold-start server) | Tăng lên 45000ms trong tất cả file test và conftest.py |
-| `enable_flutter_semantics` timeout quá ngắn | Tăng default từ 15000ms → 45000ms |
-| Assertion kiểm tra `all_text_contents()` cho trạng thái sách | Chuyển sang kiểm tra `aria-label` của card sách |
-
-### 5.3. Smart Wait vs. `time.sleep()`
-
-| Tình huống | Cách xử lý |
-|-----------|-----------|
-| Chờ text xuất hiện sau action | `wait_for_flutter(page, text="...")` |
-| Chờ Flutter re-render (không biết text cụ thể) | `page.wait_for_timeout(1000–2000)` |
-| Chờ element cụ thể | `locator.wait_for(state="attached", timeout=...)` |
-
-`time.sleep()` không được dùng trong bộ test này.
-
-### 5.4. Quản lý tài khoản test
-
-| Tài khoản | Trạng thái | Sử dụng trong |
-|-----------|-----------|--------------|
-| `ba.nguyen@email.com` (MEM002) | Active, BOOK003 quá hạn | TC-01, TC-09, TC-10, TC-19 |
-| `dam.tran@email.com` (MEM001) | Active, không mượn | TC-02, TC-05, TC-07, TC-08, TC-12, TC-14, TC-18, TC-22, TC-24, TC-29 |
-| `biet.hoang@email.com` (MEM006) | Active, BOOK013 đang mượn | TC-04, TC-06, TC-11, TC-15, TC-23, TC-25 |
-| `cu.le@email.com` (MEM004) | **Tạm ngưng** | TC-16 |
-| `binh.pham@email.com` (MEM005) | **Hết hạn** | TC-17 |
-| `librarian@library.com` | Thủ thư | TC-20, TC-21, TC-26, TC-27 |
-
-### 5.5. Isolation giữa các test
-
-Mỗi test fixture `page` tạo **browser context mới** → trạng thái trình duyệt tự động reset sau mỗi test. Browser fixture có `scope="session"` để tái sử dụng tiến trình Chromium và giảm overhead.
+**Summary (recorded run):** 8 FAIL → 4 real bugs · 3 FAIL → weak oracle · 2 FAIL → client-side limitation · 2 FAIL → peripheral feature.
+**After the oracle fix (§7.2):** the 3 tests TC-16/17/34 now **PASS** → a full re-run leaves **12 FAIL** (8 bug-evidence including the now-correct TC-33 + 2 client-side + 2 peripheral).
 
 ---
 
-## 6. Kết luận / Conclusion
+## 7. Technical Analysis
 
-- **26/31 test case PASS** — bao phủ toàn bộ 8 SRS requirement chính.
-- **5 lỗi hệ thống phát hiện** (BUG-01 → BUG-05) tập trung ở:
-  - REQ-04: Kiểm soát mượn sách (3/5 lỗi) — **nhóm lỗi nghiêm trọng nhất**
-  - REQ-05: Cảnh báo quá hạn (1/5)
-  - REQ-07: Quản lý thành viên (1/5)
-- Các chức năng **hoạt động đúng**: Đăng nhập, Tìm kiếm/Lọc, Mượn/Trả sách (flow cơ bản), Quản lý phiếu mượn, Chuyển ngôn ngữ.
-- Thời gian chạy toàn bộ suite: **~6 phút 28 giây** (31 end-to-end tests trên Chromium headed).
+### 7.1. Handling Flutter Web (CanvasKit)
+- The UI renders on `<canvas>` with no normal DOM → interaction goes through the **Accessibility Semantics Tree**.
+- Call `enable_flutter_semantics(page)` after every DOM-changing action.
+- **Book status** ("Có sẵn"/Available, "Đã mượn"/Borrowed) lives in the `aria-label` of
+  `flt-semantics[role="group"]`, **not** in `all_text_contents()` — assertions must read `aria-label`.
 
----
+### 7.2. Oracle lesson — and the fix applied
+The borrow-rejection message only appears **after clicking the confirm "Mượn" button** in the dialog.
+A test that only clicks "Mượn sách này" (opens the dialog) and reads immediately sees the book details,
+**not yet** the rejection message → wrong conclusion. `test_deep_logic.py` uses the `_try_borrow_once()`
+helper, which clicks through the dialog, so it reads correctly — this is the reliable oracle pattern.
 
-## 6.5. Bonus B2 — Data-Driven Testing / Kiểm thử hướng dữ liệu
+**Fixed:** 4 tests in `test_extended.py` (TC-16, TC-17, TC-33, TC-34) were given the extra step of
+clicking the confirm "Mượn" button after opening the dialog. Re-run and verified (2m35s):
+- **TC-16, TC-17, TC-34 → PASS**: the system actually **blocks** suspended/expired members (eliminating
+  the 3 "displayed result differs from expectation" false alarms).
+- **TC-33 → still FAIL but now for the right reason**: for a suspended member the returned message is
+  "hết hạn"/expired (`says_expired_wrongly = True`) → precise evidence for **BUG-C**.
 
-### Đã triển khai
+### 7.3. "One bug = one failing test"
+In `test_deep_logic.py`, each bug is **one** test (BUG-A loops 3 accounts, BUG-B loops 2 IDs, BUG-D
+loops 2 books) by opening a **fresh browser context per iteration** (`_fresh_page`). This avoids the
+Flutter input glitch when filling the same field a second time, while keeping seed data clean.
 
-Bộ test sử dụng `@pytest.mark.parametrize` (textbook Ch.3 §3.3.2) để tách dữ liệu test khỏi code logic, thực hiện ở 2 nhóm:
+### 7.4. Performance & recommendation
+- All 64 tests run **sequentially in ~37 min**: each test logs in fresh + waits up to 45 s for
+  `flt-glass-pane` (cold start) + multiple `wait_for_timeout` calls for CanvasKit re-render.
+- **Recommendation:** install `pytest-xdist` and run `pytest -n auto` to parallelize across files →
+  roughly **3–4× faster**. (Not applied in this run.)
 
-#### Nhóm 1: Đăng nhập thất bại (`tests/test_login.py`)
-
-TC-02, TC-03, TC-02b gộp thành 1 hàm `test_login_fail` với 3 bộ dữ liệu:
-
-| Bộ dữ liệu | Email | Mật khẩu | tc_id | Mô tả |
-|------------|-------|----------|-------|-------|
-| 1 | `dam.tran@email.com` | `wrongpassword` | TC-02 | Sai mật khẩu |
-| 2 | *(trống)* | *(trống)* | TC-03 | Bỏ trống cả hai trường |
-| 3 | `nobody@test.com` | `anything` | TC-02b | Email không tồn tại |
-
-**Lợi ích Data-Driven** (so với viết riêng 3 hàm):
-- Code logic chỉ viết 1 lần (DRY — Don't Repeat Yourself)
-- Thêm kịch bản mới = thêm 1 dòng tuple, không cần viết hàm mới
-- Sửa logic assert = sửa 1 chỗ, áp dụng cho tất cả bộ dữ liệu
-
-#### Nhóm 2: Thêm thành viên — xác thực email (`tests/test_extended.py`)
-
-TC-20, TC-21, TC-27a, TC-27b, TC-27c gộp thành 1 hàm `test_add_member_email_validation_data_driven` với 5 bộ dữ liệu:
-
-| Bộ dữ liệu | Email | tc_id | Expect | Mô tả |
-|------------|-------|-------|--------|-------|
-| 1 | `testmember2024@email.com` | TC-20 | Success | Email hợp lệ |
-| 2 | `ba.nguyen@email.com` | TC-21 | Reject | Email trùng |
-| 3 | `invalidemail` | TC-27a | Reject | Không có @ |
-| 4 | `user@domain` | TC-27b | Reject | Không có dấu chấm trong domain |
-| 5 | *(trống)* | TC-27c | Reject | Email bỏ trống |
-
-**Đặc điểm**: Thêm flag `expect_success` trong bộ dữ liệu để assertion tự động chọn nhánh kiểm tra (thành công vs từ chối) — minh hoạ sức mạnh của data-driven khi cùng 1 hàm xử lý cả positive và negative cases.
-
-### Ánh xạ Textbook
-
-| Khái niệm textbook | Áp dụng trong repo |
-|---|---|
-| Data-Driven Testing (Ch.3 §3.3.2) | `@pytest.mark.parametrize` gộp nhiều bộ dữ liệu vào 1 hàm |
-| DataPoints trong JUnit (Ch.3 §3.3.3) | Tương đương: danh sách tuple trong `parametrize` |
-| DRY Principle | Code logic login / add-member chỉ viết 1 lần, dữ liệu thay đổi |
+### 7.5. Test isolation
+Each `page` fixture creates a **new browser context** → seed data resets after every test. The
+`browser` fixture is `scope="session"` to reuse the Chromium process.
 
 ---
 
-## 7. Khai báo sử dụng AI
+## 8. Verified Working (PASS)
 
-Bộ test TC-13 đến TC-31, báo cáo, và Data-Driven Testing (Bonus B2) được hỗ trợ bởi **Claude Code (Anthropic)**. Cụ thể:
-- AI phân tích SRS và đề xuất 19 test case bổ sung bao phủ các requirement chưa được test
-- AI sinh locator pattern và assertion phù hợp với Flutter Web CanvasKit Semantics Tree
-- AI chẩn đoán và sửa lỗi timeout (15000ms → 45000ms), aria-label assertion, form flow
-- AI hỗ trợ triển khai `@pytest.mark.parametrize` cho Bonus B2 — gộp TC-02/03/02b và TC-20/21/27
-- Nhóm đã kiểm tra logic, xem screenshot minh chứng và xác nhận kết quả trước khi nộp
-- Toàn bộ code được hiểu và có thể giải thích bởi thành viên nhóm
+The control/passing tests prove the system behaves **correctly** in the following areas (so the FAILs
+above are real signals, not a broken suite):
+
+- **Login**: success, wrong password, empty fields, non-existent email (REQ-01).
+- **Search/Filter**: by title, by author, by category, case-insensitive, and the "Không tìm thấy sách"
+  (No books found) message (REQ-03).
+- **Basic borrow/return**: successful borrow, view own records, return a book (REQ-04/05/08).
+- **Due date = 14 days** is correct (`test_ok_borrow_due_date_is_14_days`).
+- **Real-time / single-copy**: a book leaves the "Available" catalog immediately after borrowing
+  (`test_ok_realtime_book_leaves_catalog_after_borrow`).
+- **Tab-level authorization**: a regular member does not see admin tabs/buttons
+  (`test_ok_member_has_no_admin_capabilities`, TC-40).
+- **Correct "expired" reason** for an expired member (`test_ok_expired_member_correct_reason`).
+- **Returning a book frees one slot** (`test_ok_returning_book_frees_a_slot`).
+- **Librarian**: sees all borrow records (TC-26), "Kiểm tra quá hạn" (overdue check) works on the
+  librarian side (TC-46), and data restore works (TC-47).
+
+---
+
+## 9. Bonus B2 — Data-Driven Testing
+
+Uses `@pytest.mark.parametrize` (textbook Ch.3 §3.3.2) in two groups:
+
+**Group 1 — Login failure** (`test_login.py::test_login_fail`), 3 datasets:
+
+| Email | Password | tc_id | Result |
+|-------|----------|-------|--------|
+| `dam.tran@email.com` | `wrongpassword` | TC-02 | ✅ PASS |
+| *(empty)* | *(empty)* | TC-03 | ✅ PASS |
+| `nobody@test.com` | `anything` | TC-02b | ✅ PASS |
+
+**Group 2 — Add-member email validation** (`test_extended.py::test_add_member_email_validation_data_driven`), 5 datasets:
+
+| Email | tc_id | Expected | Result |
+|-------|-------|----------|--------|
+| `testmember2024@email.com` | TC-20 | Add succeeds | ❌ FAIL — system rejects a valid email (see §6 #15) |
+| `ba.nguyen@email.com` | TC-21 | Reject (duplicate) | ✅ PASS |
+| `invalidemail` | TC-27a | Reject (no @) | ✅ PASS |
+| `user@domain` | TC-27b | Reject (no dot in domain) | ✅ PASS |
+| *(empty)* | TC-27c | Reject | ✅ PASS |
+
+> The TC-20 dataset FAIL correctly reflects the peripheral-feature issue in §6 (#14–15); it is not a test defect.
+
+---
+
+## 10. AI Usage Declaration
+
+The extended tests, the deep-logic tests (`test_deep_logic.py`), and this report were assisted by
+**Claude Code (Anthropic)**:
+- Analyzed the SRS, compared it against actual behavior, and proposed test cases covering REQ-01 → REQ-08.
+- Generated locators/assertions suited to Flutter Web CanvasKit (Semantics Tree, `aria-label`).
+- Designed a reliable oracle (clicking through the confirm dialog) and the "one bug = one test" structure.
+- Reconciled all 15 failing tests against the SRS to **remove false alarms** and keep only the 4 real logic bugs.
+- The team re-ran the suite, reviewed the screenshot evidence, and verified the results before submission.

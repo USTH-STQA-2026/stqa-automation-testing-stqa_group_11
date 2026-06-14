@@ -168,8 +168,17 @@ def test_borrow_suspended_member(page, test_config):
     borrow_btn = page.locator('flt-semantics[role="button"]:has-text("Mượn sách này")')
     if borrow_btn.count() > 0:
         borrow_btn.first.click()
-        page.wait_for_timeout(2000)
+        page.wait_for_timeout(1200)
         enable_flutter_semantics(page)
+        # Bấm xác nhận "Mượn" trong hộp thoại: hệ thống chỉ hiện thông báo từ chối
+        # SAU khi xác nhận. Nếu chỉ mở hộp thoại sẽ không bắt được kết quả thực tế.
+        confirm = page.locator('flt-semantics[role="button"]').filter(
+            has_text=re.compile(r'^Mượn$')
+        )
+        if confirm.count() > 0:
+            confirm.first.click()
+            page.wait_for_timeout(2000)
+            enable_flutter_semantics(page)
 
     page.screenshot(path=os.path.join(SCREENSHOT_DIR, "tc16_suspended_borrow.png"))
 
@@ -209,8 +218,16 @@ def test_borrow_expired_member(page, test_config):
     borrow_btn = page.locator('flt-semantics[role="button"]:has-text("Mượn sách này")')
     if borrow_btn.count() > 0:
         borrow_btn.first.click()
-        page.wait_for_timeout(2000)
+        page.wait_for_timeout(1200)
         enable_flutter_semantics(page)
+        # Bấm xác nhận "Mượn" trong hộp thoại để bắt được thông báo từ chối thực tế.
+        confirm = page.locator('flt-semantics[role="button"]').filter(
+            has_text=re.compile(r'^Mượn$')
+        )
+        if confirm.count() > 0:
+            confirm.first.click()
+            page.wait_for_timeout(2000)
+            enable_flutter_semantics(page)
 
     page.screenshot(path=os.path.join(SCREENSHOT_DIR, "tc17_expired_borrow.png"))
 
@@ -892,8 +909,17 @@ def test_suspended_member_error_message_specificity(page, test_config):
     borrow_btn = page.locator('flt-semantics[role="button"]:has-text("Mượn sách này")')
     if borrow_btn.count() > 0:
         borrow_btn.first.click()
-        page.wait_for_timeout(2000)
+        page.wait_for_timeout(1200)
         enable_flutter_semantics(page)
+        # Bấm xác nhận "Mượn" để hệ thống thực sự xử lý và trả về thông báo từ chối
+        # (mới kiểm chứng được lý do đúng/sai — đây là BUG-C nếu báo "hết hạn").
+        confirm = page.locator('flt-semantics[role="button"]').filter(
+            has_text=re.compile(r'^Mượn$')
+        )
+        if confirm.count() > 0:
+            confirm.first.click()
+            page.wait_for_timeout(2000)
+            enable_flutter_semantics(page)
 
     page.screenshot(path=os.path.join(SCREENSHOT_DIR, "tc33_suspended_error_msg.png"))
 
@@ -934,8 +960,16 @@ def test_expired_member_error_message_specificity(page, test_config):
     borrow_btn = page.locator('flt-semantics[role="button"]:has-text("Mượn sách này")')
     if borrow_btn.count() > 0:
         borrow_btn.first.click()
-        page.wait_for_timeout(2000)
+        page.wait_for_timeout(1200)
         enable_flutter_semantics(page)
+        # Bấm xác nhận "Mượn" trong hộp thoại để bắt được thông báo "hết hạn" thực tế.
+        confirm = page.locator('flt-semantics[role="button"]').filter(
+            has_text=re.compile(r'^Mượn$')
+        )
+        if confirm.count() > 0:
+            confirm.first.click()
+            page.wait_for_timeout(2000)
+            enable_flutter_semantics(page)
 
     page.screenshot(path=os.path.join(SCREENSHOT_DIR, "tc34_expired_error_msg.png"))
 
