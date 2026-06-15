@@ -17,9 +17,9 @@
 | Metric | Value |
 |--------|-------|
 | Total tests (executed) | **64** |
-| ✅ PASS | **49** |
-| ❌ FAIL | **15** |
-| ⏭ SKIP | 0 |
+| PASS | **49** |
+| FAIL | **15** |
+| SKIP | 0 |
 | Run time | **2202 s (~36 min 42 s)**, sequential, headless Chromium |
 
 **How to read the 15 FAILs:** these are not 15 separate defects. Of the 15 failing tests:
@@ -57,7 +57,7 @@ The suite uses the **Arrange → Act → Assert** structure (ASSIGNMENT §4) and
 
 ## 3. Results per File
 
-| File | Tests | ✅ PASS | ❌ FAIL |
+| File | Tests | PASS | FAIL |
 |------|:-----:|:------:|:------:|
 | `tests/test_login.py` | 4 | 4 | 0 |
 | `tests/test_search.py` | 4 | 4 | 0 |
@@ -75,18 +75,18 @@ These are the **required** part of the assignment (ASSIGNMENT §3). **All PASS.*
 
 | TC | Test function | File | SRS | Result | Screenshot |
 |----|---------------|------|-----|--------|------------|
-| TC-01 | `test_login_success` | `test_login.py` | REQ-01 | ✅ PASS | `login_success.png` |
-| TC-02 | `test_login_fail` (wrong password) | `test_login.py` | REQ-01 | ✅ PASS | `tc-02_login_fail.png` |
-| TC-03 | `test_login_fail` (empty fields) | `test_login.py` | REQ-01 | ✅ PASS | `tc-03_login_fail.png` |
-| TC-04 | `test_search_book_by_name` | `test_search.py` | REQ-03 | ✅ PASS | `tc04_search_by_name.png` |
-| TC-05 | `test_search_book_no_result` | `test_search.py` | REQ-03 | ✅ PASS | `tc05_search_no_result.png` |
-| TC-06 | `test_filter_by_category` | `test_search.py` | REQ-03 | ✅ PASS | `tc06_filter_category.png` |
-| TC-07 | `test_search_by_author` | `test_search.py` | REQ-03 | ✅ PASS | `tc07_search_by_author.png` |
-| TC-08 | `test_borrow_book` | `test_borrow_return.py` | REQ-04 | ✅ PASS | `tc08_borrow_book.png` |
-| TC-09 | `test_view_borrowed_books` | `test_borrow_return.py` | REQ-08 | ✅ PASS | `tc09_view_borrowed.png` |
-| TC-10 | `test_return_book` | `test_borrow_return.py` | REQ-05 | ✅ PASS | `tc10_return_book.png` |
-| TC-11 | `test_logout` | `test_general.py` | — | ✅ PASS | `tc11_logout.png` |
-| TC-12 | `test_switch_language_to_english` | `test_general.py` | §5 | ✅ PASS | `tc12_language_en.png` |
+| TC-01 | `test_login_success` | `test_login.py` | REQ-01 | PASS | `login_success.png` |
+| TC-02 | `test_login_fail` (wrong password) | `test_login.py` | REQ-01 | PASS | `tc-02_login_fail.png` |
+| TC-03 | `test_login_fail` (empty fields) | `test_login.py` | REQ-01 | PASS | `tc-03_login_fail.png` |
+| TC-04 | `test_search_book_by_name` | `test_search.py` | REQ-03 | PASS | `tc04_search_by_name.png` |
+| TC-05 | `test_search_book_no_result` | `test_search.py` | REQ-03 | PASS | `tc05_search_no_result.png` |
+| TC-06 | `test_filter_by_category` | `test_search.py` | REQ-03 | PASS | `tc06_filter_category.png` |
+| TC-07 | `test_search_by_author` | `test_search.py` | REQ-03 | PASS | `tc07_search_by_author.png` |
+| TC-08 | `test_borrow_book` | `test_borrow_return.py` | REQ-04 | PASS | `tc08_borrow_book.png` |
+| TC-09 | `test_view_borrowed_books` | `test_borrow_return.py` | REQ-08 | PASS | `tc09_view_borrowed.png` |
+| TC-10 | `test_return_book` | `test_borrow_return.py` | REQ-05 | PASS | `tc10_return_book.png` |
+| TC-11 | `test_logout` | `test_general.py` | — | PASS | `tc11_logout.png` |
+| TC-12 | `test_switch_language_to_english` | `test_general.py` | §5 | PASS | `tc12_language_en.png` |
 
 ---
 
@@ -104,7 +104,7 @@ All 4 bugs were verified **directly on the live system** and belong to core busi
 | **Actual** | All 3 accounts manage to hold **4** books; only blocked at the **5th**. The guard uses `>= 4` instead of `>= 3`. |
 | **Evidence** | `test_bug_a_borrow_limit_off_by_one` (covers 3 accounts) + `test_borrow_limit_exceeded` (TC-15) + `test_borrow_limit_ba_nguyen` (TC-41) + `test_borrow_limit_biet_hoang` (TC-48) |
 | **Screenshots** | `bug_a_limit_ba.nguyen.png`, `bug_a_limit_dam.tran.png`, `bug_a_limit_biet.hoang.png`, `tc15_borrow_limit.png`, `tc41_borrow_limit_ba_nguyen.png`, `tc48_biet_hoang_limit.png` |
-| **Severity** | 🔴 **Critical** — directly violates a business rule, reproducible on **every** account |
+| **Severity** | **Critical** — directly violates a business rule, reproducible on **every** account |
 
 ### BUG-B — Borrow-record leak between members (authorization violation)
 | Field | Detail |
@@ -116,7 +116,7 @@ All 4 bugs were verified **directly on the live system** and belong to core busi
 | **Actual** | The **full** records leak: BR001 of `ba.nguyen` and BR003 of `biet.hoang` (name, book, borrow date, due date) |
 | **Evidence** | `test_bug_b_member_record_isolation` |
 | **Screenshots** | `bug_b_isolation_dam.tran_MEM002.png`, `bug_b_isolation_dam.tran_MEM006.png` |
-| **Severity** | 🔴 **Critical** — personal data exposed across members |
+| **Severity** | **Critical** — personal data exposed across members |
 
 > **Important note:** the default "Phiếu mượn của tôi" (My borrow records) view does **not** leak
 > (test `TC-32` `test_member_cannot_see_other_members_records` PASSES). The hole is **only** in the
@@ -132,7 +132,7 @@ All 4 bugs were verified **directly on the live system** and belong to core busi
 | **Actual** | The system shows **"Thành viên đã hết hạn. Không thể mượn sách."** (Member has expired. Cannot borrow.) — identical to the message for an *expired* member. There is only one shared "expired" rejection branch. |
 | **Evidence** | `test_bug_c_suspended_member_wrong_reason` + `test_suspended_member_error_message_specificity` (TC-33) |
 | **Screenshots** | `bug_c_suspended_reason.png`, `tc33_suspended_error_msg.png` |
-| **Severity** | 🟠 **High** — the system **blocks correctly** (no borrow) but **reports the wrong reason**, which misleads users |
+| **Severity** | **High** — the system **blocks correctly** (no borrow) but **reports the wrong reason**, which misleads users |
 
 > Control: for an **expired** member (`binh.pham`), the "expired" message is actually **correct** —
 > test `test_ok_expired_member_correct_reason` PASSES (`ok_expired_reason.png`). This contrast proves
@@ -148,7 +148,7 @@ All 4 bugs were verified **directly on the live system** and belong to core busi
 | **Actual** | **0 results** for both — the catalog only shows "Available" books and hides non-available ones entirely |
 | **Evidence** | `test_bug_d_catalog_hides_non_available_books` |
 | **Screenshots** | `bug_d_hidden_BOOK003.png`, `bug_d_hidden_BOOK007.png` |
-| **Severity** | 🟠 **High** — violates the display requirement; users cannot tell a book exists but is borrowed/lost |
+| **Severity** | **High** — violates the display requirement; users cannot tell a book exists but is borrowed/lost |
 
 ---
 
@@ -164,13 +164,13 @@ All 4 bugs were verified **directly on the live system** and belong to core busi
 | 6 | `test_bug_c_suspended_member_wrong_reason` | **BUG-C** | Wrong "suspended" reason |
 | 7 | `test_suspended_member_error_message_specificity` (TC-33) | **BUG-C** | Oracle **strengthened** (now clicks confirm); now correctly shows "hết hạn" for a suspended member → valid BUG-C evidence. |
 | 8 | `test_bug_d_catalog_hides_non_available_books` | **BUG-D** | Hides non-"Available" books |
-| 9 | `test_borrow_suspended_member` (TC-16) | ✅ **Fixed → now PASS** | Previously only opened the dialog, so no response was captured. Now clicks confirm → the system blocks correctly (shows "không thể" / cannot) → **PASS**. |
-| 10 | `test_borrow_expired_member` (TC-17) | ✅ **Fixed → now PASS** | Same as #9. The expired member **is correctly blocked** → **PASS**. |
-| 11 | `test_expired_member_error_message_specificity` (TC-34) | ✅ **Fixed → now PASS** | Now captures the correct "hết hạn" reason → **PASS**. |
-| 12 | `test_return_overdue_book_warning` (TC-19) | 🟡 Model limitation — **not a bug** | Data is **client-side / per-session** (SRS §5.1): the librarian's "Kiểm tra quá hạn" (overdue check) does not propagate to the member's session. |
-| 13 | `test_overdue_record_visible_to_member` (TC-45) | 🟡 Model limitation — **not a bug** | Same as #12 — a member in a different session does not see the overdue marking. |
-| 14 | `test_librarian_add_member` (TC-20) | 🔵 Peripheral feature — **out of scope** | The "Add member" form rejects a valid email. Agreed to treat as a minor issue, not counted among the logic bugs. |
-| 15 | `test_add_member_email_validation_data_driven[TC-20]` | 🔵 Peripheral feature — **out of scope** | Same issue as #14 (the valid-email dataset). |
+| 9 | `test_borrow_suspended_member` (TC-16) | **Fixed → now PASS** | Previously only opened the dialog, so no response was captured. Now clicks confirm → the system blocks correctly (shows "không thể" / cannot) → **PASS**. |
+| 10 | `test_borrow_expired_member` (TC-17) | **Fixed → now PASS** | Same as #9. The expired member **is correctly blocked** → **PASS**. |
+| 11 | `test_expired_member_error_message_specificity` (TC-34) | **Fixed → now PASS** | Now captures the correct "hết hạn" reason → **PASS**. |
+| 12 | `test_return_overdue_book_warning` (TC-19) | Model limitation — **not a bug** | Data is **client-side / per-session** (SRS §5.1): the librarian's "Kiểm tra quá hạn" (overdue check) does not propagate to the member's session. |
+| 13 | `test_overdue_record_visible_to_member` (TC-45) | Model limitation — **not a bug** | Same as #12 — a member in a different session does not see the overdue marking. |
+| 14 | `test_librarian_add_member` (TC-20) | Peripheral feature — **out of scope** | The "Add member" form rejects a valid email. Agreed to treat as a minor issue, not counted among the logic bugs. |
+| 15 | `test_add_member_email_validation_data_driven[TC-20]` | Peripheral feature — **out of scope** | Same issue as #14 (the valid-email dataset). |
 
 **Summary (recorded run):** 8 FAIL → 4 real bugs · 3 FAIL → weak oracle · 2 FAIL → client-side limitation · 2 FAIL → peripheral feature.
 **After the oracle fix (§7.2):** the 3 tests TC-16/17/34 now **PASS** → a full re-run leaves **12 FAIL** (8 bug-evidence including the now-correct TC-33 + 2 client-side + 2 peripheral).
@@ -244,19 +244,19 @@ Uses `@pytest.mark.parametrize` (textbook Ch.3 §3.3.2) in two groups:
 
 | Email | Password | tc_id | Result |
 |-------|----------|-------|--------|
-| `dam.tran@email.com` | `wrongpassword` | TC-02 | ✅ PASS |
-| *(empty)* | *(empty)* | TC-03 | ✅ PASS |
-| `nobody@test.com` | `anything` | TC-02b | ✅ PASS |
+| `dam.tran@email.com` | `wrongpassword` | TC-02 | PASS |
+| *(empty)* | *(empty)* | TC-03 | PASS |
+| `nobody@test.com` | `anything` | TC-02b | PASS |
 
 **Group 2 — Add-member email validation** (`test_extended.py::test_add_member_email_validation_data_driven`), 5 datasets:
 
 | Email | tc_id | Expected | Result |
 |-------|-------|----------|--------|
-| `testmember2024@email.com` | TC-20 | Add succeeds | ❌ FAIL — system rejects a valid email (see §6 #15) |
-| `ba.nguyen@email.com` | TC-21 | Reject (duplicate) | ✅ PASS |
-| `invalidemail` | TC-27a | Reject (no @) | ✅ PASS |
-| `user@domain` | TC-27b | Reject (no dot in domain) | ✅ PASS |
-| *(empty)* | TC-27c | Reject | ✅ PASS |
+| `testmember2024@email.com` | TC-20 | Add succeeds | FAIL — system rejects a valid email (see §6 #15) |
+| `ba.nguyen@email.com` | TC-21 | Reject (duplicate) | PASS |
+| `invalidemail` | TC-27a | Reject (no @) | PASS |
+| `user@domain` | TC-27b | Reject (no dot in domain) | PASS |
+| *(empty)* | TC-27c | Reject | PASS |
 
 > The TC-20 dataset FAIL correctly reflects the peripheral-feature issue in §6 (#14–15); it is not a test defect.
 
