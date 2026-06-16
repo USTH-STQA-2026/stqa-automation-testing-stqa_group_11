@@ -37,7 +37,7 @@ def _login_as(page, base_url, email, password):
 def test_logout(page, test_config):
     """TC-11: Logout success (*Đăng xuất thành công*)
 
-    🔴 NOT COMPLETED (*CHƯA HOÀN THÀNH*)
+    ✅ COMPLETED (*ĐÃ HOÀN THÀNH*)
 
     Description (*Mô tả*):
         Log in → click Logout → verify page returns to login screen.
@@ -66,7 +66,7 @@ def test_logout(page, test_config):
 def test_switch_language_to_english(page, test_config):
     """TC-12: Switch language to English (*Chuyển ngôn ngữ sang tiếng Anh*)
 
-    🔴 NOT COMPLETED (*CHƯA HOÀN THÀNH*)
+    ✅ COMPLETED (*ĐÃ HOÀN THÀNH*)
 
     Description (*Mô tả*):
         Log in → click "EN" button → verify UI switches to English.

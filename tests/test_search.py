@@ -36,7 +36,7 @@ def _login_as(page, base_url, email, password):
 def test_search_book_by_name(page, test_config):
     """TC-04: Search book by name – results found (*Tìm kiếm sách theo tên — tìm thấy kết quả*)
 
-    🔴 NOT COMPLETED (*CHƯA HOÀN THÀNH*)
+    ✅ COMPLETED (*ĐÃ HOÀN THÀNH*)
 
     Description (*Mô tả*):
         Log in → search keyword "Flutter" → verify Flutter books appear in results.
@@ -60,7 +60,7 @@ def test_search_book_by_name(page, test_config):
 def test_search_book_no_result(page, test_config):
     """TC-05: Search book – no results (*Tìm kiếm sách — không có kết quả*)
 
-    🔴 NOT COMPLETED (*CHƯA HOÀN THÀNH*)
+    ✅ COMPLETED (*ĐÃ HOÀN THÀNH*)
 
     Description (*Mô tả*):
         Log in → search a non-existent keyword (e.g. "xyz_khong_ton_tai_12345")
@@ -84,7 +84,7 @@ def test_search_book_no_result(page, test_config):
 def test_filter_by_category(page, test_config):
     """TC-06: Filter books by category 'Công nghệ' (*Lọc sách theo thể loại 'Công nghệ'*)
 
-    🔴 NOT COMPLETED (*CHƯA HOÀN THÀNH*)
+    ✅ COMPLETED (*ĐÃ HOÀN THÀNH*)
 
     Description (*Mô tả*):
         Log in → enter "Công nghệ" in the category filter → verify all displayed books
@@ -117,7 +117,7 @@ def test_filter_by_category(page, test_config):
 def test_search_by_author(page, test_config):
     """TC-07: Search book by author name (*Tìm kiếm sách theo tên tác giả*)
 
-    🔴 NOT COMPLETED (*CHƯA HOÀN THÀNH*)
+    ✅ COMPLETED (*ĐÃ HOÀN THÀNH*)
 
     Description (*Mô tả*):
         Log in → search author name (e.g. "Nguyễn Minh Đức") → verify results found.
