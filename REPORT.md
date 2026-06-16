@@ -4,6 +4,7 @@
 **Tools**: Python 3.12 + Playwright 1.49.1 + pytest 8.3.4 (Flutter Web / CanvasKit)
 **Run date**: 2026-06-14
 **Team**: Group 11 — 252ICT2012.11 — Semester 2, 2025–2026
+**GitHub Repository**: [https://github.com/USTH-STQA-2026/stqa-automation-testing-stqa_group_11](https://github.com/USTH-STQA-2026/stqa-automation-testing-stqa_group_11)
 
 > This report is the **Bonus B4** deliverable (results description + analysis). Every "expected
 > result" is derived from the **SRS** (`docs/SRS-library-system.md`) — the single source of truth
