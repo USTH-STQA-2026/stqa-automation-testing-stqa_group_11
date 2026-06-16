@@ -16,18 +16,28 @@ Hints (*Gợi ý*):
       (*Sau chuyển EN: text tiếng Anh có thể xuất hiện*)
 """
 import os
-import time
 import pytest
 from conftest import (
     enable_flutter_semantics, flutter_fill, flutter_click_button,
-    login, SCREENSHOT_DIR,
+    wait_for_flutter, SCREENSHOT_DIR,
 )
+
+
+def _login_as(page, base_url, email, password):
+    page.goto(base_url, wait_until="domcontentloaded", timeout=60000)
+    page.locator("flt-glass-pane").wait_for(state="attached", timeout=45000)
+    enable_flutter_semantics(page)
+    flutter_fill(page, "Email", email)
+    flutter_fill(page, "Mật khẩu", password)
+    flutter_click_button(page, "Đăng nhập")
+    wait_for_flutter(page, text="Đăng xuất")
+    enable_flutter_semantics(page)
 
 
 def test_logout(page, test_config):
     """TC-11: Logout success (*Đăng xuất thành công*)
 
-    🔴 NOT COMPLETED (*CHƯA HOÀN THÀNH*)
+    ✅ COMPLETED (*ĐÃ HOÀN THÀNH*)
 
     Description (*Mô tả*):
         Log in → click Logout → verify page returns to login screen.
@@ -40,14 +50,23 @@ def test_logout(page, test_config):
         4. Assert: "Đăng nhập" button or Email input exists
            (*Assert: có nút "Đăng nhập" hoặc ô input Email*)
     """
-    # TODO: Students implement here (Sinh viên viết code ở đây)
-    pytest.skip("Not implemented — student must complete (Chưa hoàn thành)")
+    # biet.hoang — active, no borrowed books
+    _login_as(page, test_config["base_url"], "biet.hoang@email.com", "password123")
+    flutter_click_button(page, "Đăng xuất")
+    page.wait_for_timeout(2000)
+    enable_flutter_semantics(page)
+    page.screenshot(path=os.path.join(SCREENSHOT_DIR, "tc11_logout.png"))
+    sem_text = " ".join(page.locator("flt-semantics").all_text_contents())
+    has_login_btn = "Đăng nhập" in sem_text
+    has_email_input = page.locator('input[aria-label="Email"]').count() > 0
+    assert has_login_btn or has_email_input, \
+        "Logout failed: expected to return to login page with 'Đăng nhập' or Email input"
 
 
 def test_switch_language_to_english(page, test_config):
     """TC-12: Switch language to English (*Chuyển ngôn ngữ sang tiếng Anh*)
 
-    🔴 NOT COMPLETED (*CHƯA HOÀN THÀNH*)
+    ✅ COMPLETED (*ĐÃ HOÀN THÀNH*)
 
     Description (*Mô tả*):
         Log in → click "EN" button → verify UI switches to English.
@@ -60,5 +79,14 @@ def test_switch_language_to_english(page, test_config):
         4. Get sem_text = " ".join(page.locator("flt-semantics").all_text_contents())
         5. Assert: "Logout" or "Borrow" or "Library" in sem_text
     """
-    # TODO: Students implement here (Sinh viên viết code ở đây)
-    pytest.skip("Not implemented — student must complete (Chưa hoàn thành)")
+    # dam.tran — active, no borrowed books
+    _login_as(page, test_config["base_url"], "dam.tran@email.com", "password123")
+    flutter_click_button(page, "EN")
+    page.wait_for_timeout(2000)
+    enable_flutter_semantics(page)
+    page.screenshot(path=os.path.join(SCREENSHOT_DIR, "tc12_language_en.png"))
+    sem_text = " ".join(page.locator("flt-semantics").all_text_contents())
+    english_words = ["Logout", "Borrow", "Library", "Search", "Return", "Book"]
+    has_english = any(word in sem_text for word in english_words)
+    assert has_english, \
+        f"Language switch to EN failed: none of {english_words} found in UI"

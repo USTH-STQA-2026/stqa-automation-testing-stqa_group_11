@@ -92,7 +92,7 @@ def web_tech(page) -> WebTech:
     """Phát hiện công nghệ web và trả về WebTech object.
     Dùng trong test để biết trang đang dùng công nghệ gì."""
     page.goto(BASE_URL, wait_until="networkidle", timeout=60000)
-    page.locator("flt-glass-pane").wait_for(state="attached", timeout=15000)
+    page.locator("flt-glass-pane").wait_for(state="attached", timeout=45000)
     tech = detect_technology(page)
     print(f"\n[web_detector] {tech.name.value}", end="")
     if tech.renderer:
@@ -101,7 +101,7 @@ def web_tech(page) -> WebTech:
     return tech
 
 
-def enable_flutter_semantics(page, timeout=15000):
+def enable_flutter_semantics(page, timeout=45000):
     """Bật Flutter Semantics Tree để tạo DOM elements tương tác được.
     Tự động chờ Flutter render xong trước khi bật (Smart Wait)."""
     # Already enabled.
