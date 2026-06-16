@@ -32,9 +32,9 @@
   the limits of the client-side data model, 2 belong to a peripheral feature (add member) — see **§6**.
 
 > **Update after the recorded run:** the 3 "weak-oracle" tests (TC-16, TC-17, TC-34) have been
-> **fixed** to click the confirm "Mượn" (Borrow) button in the dialog (see §7.2). Re-run and verified:
+> **fixed** to click the confirm "Borrow" button in the dialog (see §7.2). Re-run and verified:
 > **TC-16/17/34 now PASS**, while TC-33 still FAILs but is now **valid** evidence for BUG-C (it shows
-> "hết hạn" / expired for a *suspended* member). A **full** re-run would therefore yield
+> "expired" for a *suspended* member). A **full** re-run would therefore yield
 > **64 / 52 PASS / 12 FAIL**. The table above is kept as the recorded full run.
 
 **All 12 mandatory test cases (TC-01 → TC-12) PASS.** The 4 confirmed system bugs (BUG-A → BUG-D)
@@ -52,7 +52,7 @@ The suite uses the **Arrange → Act → Assert** structure (ASSIGNMENT §4) and
 | **Control test** (`test_ok_*`) | Asserts a correct behavior the system **does** get right | **PASS = oracle calibration** (proves the suite does not "fail on everything"). |
 
 > **Key oracle lesson (see §7):** the system's borrow-rejection message only appears **after the
-> confirm "Mượn" (Borrow) button is clicked in the dialog**. A test that only opens the dialog without
+> confirm "Borrow" button is clicked in the dialog**. A test that only opens the dialog without
 > confirming will **not capture** the message → false alarm. `test_deep_logic.py` always clicks the
 > confirm button, so it reads the correct result.
 
@@ -125,8 +125,8 @@ All 4 bugs were verified **directly on the live system** and belong to core busi
 | Field | Detail |
 |-------|--------|
 | **SRS** | REQ-08: "A member may only view **their own** borrow records. They **must NOT view** other members' records." |
-| **Account** | `dam.tran` (MEM003) using the **"Tra cứu phiếu mượn"** (look up borrow record by member ID) feature |
-| **Steps** | Borrow/Return tab → "Tra cứu phiếu mượn" → enter `MEM002` / `MEM006` → "Tra cứu" (Look up) |
+| **Account** | `dam.tran` (MEM003) using the **"Look up borrow record"** feature |
+| **Steps** | Borrow/Return tab → "Look up borrow record" → enter `MEM002` / `MEM006` → "Look up" |
 | **Expected** | Other members' records are not shown |
 | **Actual** | The **full** records leak: BR001 of `ba.nguyen` and BR003 of `biet.hoang` (name, book, borrow date, due date) |
 | **Evidence** | `test_bug_b_member_record_isolation` |
@@ -139,7 +139,7 @@ All 4 bugs were verified **directly on the live system** and belong to core busi
 | MEM002 (`ba.nguyen`) | ![BUG-B Leak MEM002](screenshots/bug_b_isolation_dam.tran_MEM002.png) |
 | MEM006 (`biet.hoang`) | ![BUG-B Leak MEM006](screenshots/bug_b_isolation_dam.tran_MEM006.png) |
 
-> **Important note:** the default "Phiếu mượn của tôi" (My borrow records) view does **not** leak
+> **Important note:** the default "My borrow records" view does **not** leak
 > (test `TC-32` `test_member_cannot_see_other_members_records` PASSES — see screenshot below). The hole is **only** in the
 > active "look up by member ID" feature — this is why BUG-B is a real bug even though TC-32 passes.
 
@@ -150,10 +150,10 @@ All 4 bugs were verified **directly on the live system** and belong to core busi
 | Field | Detail |
 |-------|--------|
 | **SRS** | REQ-04: "The error message must state the **correct reason** for rejection (suspended ≠ expired)" |
-| **Account** | `cu.le` (MEM004, status **Tạm ngưng** / suspended) |
-| **Steps** | Log in → borrow a book → click confirm "Mượn" |
+| **Account** | `cu.le` (MEM004, status **Suspended**) |
+| **Steps** | Log in → borrow a book → click confirm "Borrow" |
 | **Expected** | A message citing the **"suspended"** reason |
-| **Actual** | The system shows **"Thành viên đã hết hạn. Không thể mượn sách."** (Member has expired. Cannot borrow.) — identical to the message for an *expired* member. There is only one shared "expired" rejection branch. |
+| **Actual** | The system shows **"Member has expired. Cannot borrow books."** — identical to the message for an *expired* member. There is only one shared "expired" rejection branch. |
 | **Evidence** | `test_bug_c_suspended_member_wrong_reason` + `test_suspended_member_error_message_specificity` (TC-33) |
 | **Severity** | **High** — the system **blocks correctly** (no borrow) but **reports the wrong reason**, which misleads users |
 
@@ -176,7 +176,7 @@ All 4 bugs were verified **directly on the live system** and belong to core busi
 |-------|--------|
 | **SRS** | REQ-02: "Display **all** books... each book has a **status** (Available / Borrowed)" |
 | **Account** | `dam.tran` (searching the catalog) |
-| **Steps** | Search "Kiểm thử phần mềm" (BOOK003, Borrowed) and "Kinh tế vi mô" (BOOK007, Lost) |
+| **Steps** | Search "Software Testing Introduction" (BOOK003, Borrowed) and "Microeconomics" (BOOK007, Lost) |
 | **Expected** | The books still appear, with their corresponding status |
 | **Actual** | **0 results** for both — the catalog only shows "Available" books and hides non-available ones entirely |
 | **Evidence** | `test_bug_d_catalog_hides_non_available_books` |
@@ -201,12 +201,12 @@ All 4 bugs were verified **directly on the live system** and belong to core busi
 | 4 | `test_borrow_limit_biet_hoang` (TC-48) | **BUG-A** | biet.hoang holds 4 books | ![TC-48](screenshots/tc48_biet_hoang_limit.png) |
 | 5 | `test_bug_b_member_record_isolation` | **BUG-B** | Record leak via lookup | ![BUG-B](screenshots/bug_b_isolation_dam.tran_MEM002.png) |
 | 6 | `test_bug_c_suspended_member_wrong_reason` | **BUG-C** | Wrong "suspended" reason | ![BUG-C](screenshots/bug_c_suspended_reason.png) |
-| 7 | `test_suspended_member_error_message_specificity` (TC-33) | **BUG-C** | Oracle **strengthened** (now clicks confirm); now correctly shows "hết hạn" for a suspended member → valid BUG-C evidence. | ![TC-33](screenshots/tc33_suspended_error_msg.png) |
+| 7 | `test_suspended_member_error_message_specificity` (TC-33) | **BUG-C** | Oracle **strengthened** (now clicks confirm); now correctly shows "expired" for a suspended member → valid BUG-C evidence. | ![TC-33](screenshots/tc33_suspended_error_msg.png) |
 | 8 | `test_bug_d_catalog_hides_non_available_books` | **BUG-D** | Hides non-"Available" books | ![BUG-D](screenshots/bug_d_hidden_BOOK003.png) |
-| 9 | `test_borrow_suspended_member` (TC-16) | **Fixed → now PASS** | Previously only opened the dialog, so no response was captured. Now clicks confirm → the system blocks correctly (shows "không thể" / cannot) → **PASS**. | ![TC-16](screenshots/tc16_suspended_borrow.png) |
+| 9 | `test_borrow_suspended_member` (TC-16) | **Fixed → now PASS** | Previously only opened the dialog, so no response was captured. Now clicks confirm → the system blocks correctly (shows "cannot" message) → **PASS**. | ![TC-16](screenshots/tc16_suspended_borrow.png) |
 | 10 | `test_borrow_expired_member` (TC-17) | **Fixed → now PASS** | Same as #9. The expired member **is correctly blocked** → **PASS**. | ![TC-17](screenshots/tc17_expired_borrow.png) |
-| 11 | `test_expired_member_error_message_specificity` (TC-34) | **Fixed → now PASS** | Now captures the correct "hết hạn" reason → **PASS**. | ![TC-34](screenshots/tc34_expired_error_msg.png) |
-| 12 | `test_return_overdue_book_warning` (TC-19) | Model limitation — **not a bug** | Data is **client-side / per-session** (SRS §5.1): the librarian's "Kiểm tra quá hạn" (overdue check) does not propagate to the member's session. | ![TC-19](screenshots/tc19_overdue_return.png) |
+| 11 | `test_expired_member_error_message_specificity` (TC-34) | **Fixed → now PASS** | Now captures the correct "expired" reason → **PASS**. | ![TC-34](screenshots/tc34_expired_error_msg.png) |
+| 12 | `test_return_overdue_book_warning` (TC-19) | Model limitation — **not a bug** | Data is **client-side / per-session** (SRS §5.1): the librarian's "Check overdue" action does not propagate to the member's session. | ![TC-19](screenshots/tc19_overdue_return.png) |
 | 13 | `test_overdue_record_visible_to_member` (TC-45) | Model limitation — **not a bug** | Same as #12 — a member in a different session does not see the overdue marking. | ![TC-45](screenshots/tc45_overdue_visible_to_member.png) |
 | 14 | `test_librarian_add_member` (TC-20) | Peripheral feature — **out of scope** | The "Add member" form rejects a valid email. Agreed to treat as a minor issue, not counted among the logic bugs. | ![TC-20](screenshots/tc20_add_member.png) |
 | 15 | `test_add_member_email_validation_data_driven[TC-20]` | Peripheral feature — **out of scope** | Same issue as #14 (the valid-email dataset). | ![TC-20 DDT](screenshots/tc-20_add_member_ddt.png) |
@@ -221,21 +221,21 @@ All 4 bugs were verified **directly on the live system** and belong to core busi
 ### 7.1. Handling Flutter Web (CanvasKit)
 - The UI renders on `<canvas>` with no normal DOM → interaction goes through the **Accessibility Semantics Tree**.
 - Call `enable_flutter_semantics(page)` after every DOM-changing action.
-- **Book status** ("Có sẵn"/Available, "Đã mượn"/Borrowed) lives in the `aria-label` of
+- **Book status** ("Available"/"Borrowed") lives in the `aria-label` of
   `flt-semantics[role="group"]`, **not** in `all_text_contents()` — assertions must read `aria-label`.
 
 ### 7.2. Oracle lesson — and the fix applied
-The borrow-rejection message only appears **after clicking the confirm "Mượn" button** in the dialog.
-A test that only clicks "Mượn sách này" (opens the dialog) and reads immediately sees the book details,
+The borrow-rejection message only appears **after clicking the confirm "Borrow" button** in the dialog.
+A test that only clicks "Borrow this book" (opens the dialog) and reads immediately sees the book details,
 **not yet** the rejection message → wrong conclusion. `test_deep_logic.py` uses the `_try_borrow_once()`
 helper, which clicks through the dialog, so it reads correctly — this is the reliable oracle pattern.
 
 **Fixed:** 4 tests in `test_extended.py` (TC-16, TC-17, TC-33, TC-34) were given the extra step of
-clicking the confirm "Mượn" button after opening the dialog. Re-run and verified (2m35s):
+clicking the confirm "Borrow" button after opening the dialog. Re-run and verified (2m35s):
 - **TC-16, TC-17, TC-34 → PASS**: the system actually **blocks** suspended/expired members (eliminating
   the 3 "displayed result differs from expectation" false alarms).
 - **TC-33 → still FAIL but now for the right reason**: for a suspended member the returned message is
-  "hết hạn"/expired (`says_expired_wrongly = True`) → precise evidence for **BUG-C**.
+  "expired" (code variable `says_expired_wrongly = True`) → precise evidence for **BUG-C**.
 
 ### 7.3. "One bug = one failing test"
 In `test_deep_logic.py`, each bug is **one** test (BUG-A loops 3 accounts, BUG-B loops 2 IDs, BUG-D
@@ -260,8 +260,8 @@ The control/passing tests prove the system behaves **correctly** in the followin
 above are real signals, not a broken suite):
 
 - **Login**: success, wrong password, empty fields, non-existent email (REQ-01).
-- **Search/Filter**: by title, by author, by category, case-insensitive, and the "Không tìm thấy sách"
-  (No books found) message (REQ-03).
+- **Search/Filter**: by title, by author, by category, case-insensitive, and the "No books found"
+  message (REQ-03).
 - **Basic borrow/return**: successful borrow, view own records, return a book (REQ-04/05/08).
 - **Due date = 14 days** is correct (`test_ok_borrow_due_date_is_14_days`).
 - **Real-time / single-copy**: a book leaves the "Available" catalog immediately after borrowing
@@ -270,7 +270,7 @@ above are real signals, not a broken suite):
   (`test_ok_member_has_no_admin_capabilities`, TC-40).
 - **Correct "expired" reason** for an expired member (`test_ok_expired_member_correct_reason`).
 - **Returning a book frees one slot** (`test_ok_returning_book_frees_a_slot`).
-- **Librarian**: sees all borrow records (TC-26), "Kiểm tra quá hạn" (overdue check) works on the
+- **Librarian**: sees all borrow records (TC-26), "Check overdue" works on the
   librarian side (TC-46), and data restore works (TC-47).
 
 **Control test screenshots:**
